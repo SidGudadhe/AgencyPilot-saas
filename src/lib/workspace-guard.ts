@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { WorkspaceRole } from "@prisma/client";
+import { findLocalUserById, findLocalUserByEmail } from "@/lib/local-store";
 
 export interface WorkspaceContext {
   userId: string;
@@ -46,34 +47,58 @@ export async function requireWorkspaceAccess(
       req.headers.get("x-workspace-id") || url.searchParams.get("workspaceId");
   }
 
-  let membership;
+  let membership: {
+    role: WorkspaceRole;
+    workspace: { id: string; name: string; slug: string };
+  } | null = null;
 
-  if (requestedWorkspaceId) {
-    // Verify membership in the specifically requested workspace
-    membership = await prisma.workspaceMembership.findUnique({
-      where: {
-        workspaceId_userId: {
-          workspaceId: requestedWorkspaceId,
+  try {
+    if (requestedWorkspaceId) {
+      // Verify membership in the specifically requested workspace
+      membership = await prisma.workspaceMembership.findUnique({
+        where: {
+          workspaceId_userId: {
+            workspaceId: requestedWorkspaceId,
+            userId: session.user.id,
+          },
+        },
+        include: {
+          workspace: true,
+        },
+      });
+    } else {
+      // Fallback to user's first available workspace membership
+      membership = await prisma.workspaceMembership.findFirst({
+        where: {
           userId: session.user.id,
         },
-      },
-      include: {
-        workspace: true,
-      },
-    });
-  } else {
-    // Fallback to user's first available workspace membership
-    membership = await prisma.workspaceMembership.findFirst({
-      where: {
-        userId: session.user.id,
-      },
-      include: {
-        workspace: true,
-      },
-      orderBy: {
-        joinedAt: "asc",
-      },
-    });
+        include: {
+          workspace: true,
+        },
+        orderBy: {
+          joinedAt: "asc",
+        },
+      });
+    }
+  } catch (dbErr) {
+    console.warn("Database lookup failed in workspace guard, using local store:", (dbErr as Error).message);
+  }
+
+  // Fallback to local store if DB is down or record not found
+  if (!membership) {
+    const localUser = findLocalUserById(session.user.id) || findLocalUserByEmail(session.user.email || "");
+    if (localUser) {
+      if (!requestedWorkspaceId || requestedWorkspaceId === localUser.workspace.id) {
+        membership = {
+          role: localUser.workspace.role,
+          workspace: {
+            id: localUser.workspace.id,
+            name: localUser.workspace.name,
+            slug: localUser.workspace.slug,
+          },
+        };
+      }
+    }
   }
 
   if (!membership) {

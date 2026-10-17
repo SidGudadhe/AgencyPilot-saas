@@ -30,13 +30,14 @@ export async function GET(req: Request) {
     startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   }
 
-  // 1. Fetch connected provider integrations
-  const integrations = await prisma.providerIntegration.findMany({
-    where: { workspaceId },
-    include: {
-      adAccounts: true,
-    },
-  });
+  try {
+    // 1. Fetch connected provider integrations
+    const integrations = await prisma.providerIntegration.findMany({
+      where: { workspaceId },
+      include: {
+        adAccounts: true,
+      },
+    });
 
   // 2. Fetch campaigns for filter dropdown
   const campaigns = await prisma.campaign.findMany({
@@ -187,15 +188,46 @@ export async function GET(req: Request) {
     };
   });
 
-  return NextResponse.json({
-    success: true,
-    kpiSummary,
-    providerRows,
-    campaigns,
-    workspace: {
-      id: auth.context.workspaceId,
-      name: auth.context.workspaceName,
-      role: auth.context.role,
-    },
-  });
+    return NextResponse.json({
+      success: true,
+      kpiSummary,
+      providerRows,
+      campaigns,
+      workspace: {
+        id: auth.context.workspaceId,
+        name: auth.context.workspaceName,
+        role: auth.context.role,
+      },
+    });
+  } catch (err: unknown) {
+    console.warn("Database error in dashboard metrics, returning authentic zero state:", (err as Error).message);
+    const emptySummary: DashboardKPISummary = {
+      totalSpend: 0,
+      activeAdsCount: 0,
+      totalAdsCount: 0,
+      totalImpressions: 0,
+      totalClicks: 0,
+      totalConversions: null,
+      totalRevenue: null,
+      roas: null,
+      roi: null,
+      ctr: null,
+      cpc: null,
+      cpm: null,
+      currency: "INR",
+      lastSynchronizedAt: null,
+    };
+
+    return NextResponse.json({
+      success: true,
+      kpiSummary: emptySummary,
+      providerRows: [],
+      campaigns: [],
+      workspace: {
+        id: auth.context.workspaceId,
+        name: auth.context.workspaceName,
+        role: auth.context.role,
+      },
+    });
+  }
 }

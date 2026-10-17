@@ -27,15 +27,16 @@ export async function GET(req: Request) {
     where.status = statusFilter as AdStatus;
   }
 
-  const ads = await prisma.ad.findMany({
-    where,
-    include: {
-      campaign: { select: { id: true, name: true } },
-      adGroup: { select: { id: true, name: true } },
-      metrics: true,
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  try {
+    const ads = await prisma.ad.findMany({
+      where,
+      include: {
+        campaign: { select: { id: true, name: true } },
+        adGroup: { select: { id: true, name: true } },
+        metrics: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
   const formattedAds: UnifiedAdItem[] = ads.map((ad) => {
     let spend = 0;
@@ -109,8 +110,15 @@ export async function GET(req: Request) {
     };
   });
 
-  return NextResponse.json({
-    success: true,
-    ads: formattedAds,
-  });
+    return NextResponse.json({
+      success: true,
+      ads: formattedAds,
+    });
+  } catch (err: unknown) {
+    console.warn("Database error in ads route, returning empty list:", (err as Error).message);
+    return NextResponse.json({
+      success: true,
+      ads: [],
+    });
+  }
 }

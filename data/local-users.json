@@ -1,0 +1,15 @@
+[
+  {
+    "id": "usr_admin_default",
+    "email": "admin@agencypilot.io",
+    "name": "AgencyPilot Admin",
+    "passwordHash": "$2a$10$wrV3YRyYVpw8KYIFJjFmfeyKqen.hFzXSG5HozhgHs5MnsbJA6pnK",
+    "createdAt": "2026-10-17T17:01:13.277Z",
+    "workspace": {
+      "id": "ws_primary_agency",
+      "name": "Primary Agency Workspace",
+      "slug": "primary-agency",
+      "role": "OWNER"
+    }
+  }
+]

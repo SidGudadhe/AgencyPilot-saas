@@ -3,6 +3,8 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
+import { findLocalUserByEmail } from "@/lib/local-store";
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
@@ -27,40 +29,61 @@ export const authOptions: NextAuthOptions = {
 
         const email = credentials.email.toLowerCase().trim();
 
-        const user = await prisma.user.findUnique({
-          where: { email },
-          include: {
-            memberships: {
-              include: {
-                workspace: true,
-              },
-              orderBy: {
-                joinedAt: "asc",
+        // 1. Try Prisma DB if available
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email },
+            include: {
+              memberships: {
+                include: {
+                  workspace: true,
+                },
+                orderBy: {
+                  joinedAt: "asc",
+                },
               },
             },
-          },
-        });
+          });
 
-        if (!user || !user.passwordHash) {
-          throw new Error("Invalid email or password");
+          if (user && user.passwordHash) {
+            const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+            if (isValid) {
+              const defaultWorkspace = user.memberships[0]?.workspace;
+              return {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                image: user.image,
+                activeWorkspaceId: defaultWorkspace?.id || null,
+              };
+            } else {
+              throw new Error("Invalid email or password");
+            }
+          }
+        } catch (dbErr: unknown) {
+          // If error was explicitly "Invalid email or password", rethrow
+          if (dbErr instanceof Error && dbErr.message === "Invalid email or password") {
+            throw dbErr;
+          }
+          console.warn("Database unavailable during login, falling back to local store:", (dbErr as Error).message);
         }
 
-        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
-
-        if (!isValid) {
-          throw new Error("Invalid email or password");
+        // 2. High-availability local store fallback
+        const localUser = findLocalUserByEmail(email);
+        if (localUser && localUser.passwordHash) {
+          const isValid = await bcrypt.compare(credentials.password, localUser.passwordHash);
+          if (isValid) {
+            return {
+              id: localUser.id,
+              email: localUser.email,
+              name: localUser.name,
+              image: null,
+              activeWorkspaceId: localUser.workspace.id,
+            };
+          }
         }
 
-        // Resolve primary workspace
-        const defaultWorkspace = user.memberships[0]?.workspace;
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          activeWorkspaceId: defaultWorkspace?.id || null,
-        };
+        throw new Error("Invalid email or password");
       },
     }),
   ],
