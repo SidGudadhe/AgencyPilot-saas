@@ -19,12 +19,13 @@ export default function DashboardLayout({
   const [dateRange, setDateRange] = useState<DateRangePreset>("30d");
 
   // Protect client side while NextAuth evaluates
-  if (status === "unauthenticated") {
-    router.push("/login");
-    return null;
-  }
+  React.useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
 
-  if (status === "loading") {
+  if (status === "loading" || status === "unauthenticated") {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#090d16] text-slate-400">
         <div className="flex items-center space-x-2 text-xs font-mono">
