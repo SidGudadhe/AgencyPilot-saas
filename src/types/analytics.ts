@@ -1,4 +1,46 @@
-import { AdProvider, AdStatus } from "@prisma/client";
+export type AdProvider =
+  | "META"
+  | "GOOGLE_ADS"
+  | "LINKEDIN"
+  | "TWITTER"
+  | "SNAPCHAT"
+  | "TIKTOK"
+  | "JIOADS"
+  | "HOTSTAR"
+  | "INMOBI"
+  | "OTHER";
+
+export type AdStatus =
+  | "ACTIVE"
+  | "PAUSED"
+  | "COMPLETED"
+  | "REJECTED"
+  | "ARCHIVED"
+  | "DELETED"
+  | "PENDING_REVIEW";
+
+export const AdProvider = {
+  META: "META",
+  GOOGLE_ADS: "GOOGLE_ADS",
+  LINKEDIN: "LINKEDIN",
+  TWITTER: "TWITTER",
+  SNAPCHAT: "SNAPCHAT",
+  TIKTOK: "TIKTOK",
+  JIOADS: "JIOADS",
+  HOTSTAR: "HOTSTAR",
+  INMOBI: "INMOBI",
+  OTHER: "OTHER",
+} as const;
+
+export const AdStatus = {
+  ACTIVE: "ACTIVE",
+  PAUSED: "PAUSED",
+  COMPLETED: "COMPLETED",
+  REJECTED: "REJECTED",
+  ARCHIVED: "ARCHIVED",
+  DELETED: "DELETED",
+  PENDING_REVIEW: "PENDING_REVIEW",
+} as const;
 
 export interface GlobalFilterState {
   dateRange: "today" | "7d" | "30d" | "90d" | "custom";
@@ -56,6 +98,7 @@ export interface UnifiedAdItem {
   status: AdStatus;
   thumbnailUrl?: string | null;
   creativeUrl?: string | null;
+  landingPageUrl?: string | null;
   spend: number;
   currency: string;
   impressions: number;

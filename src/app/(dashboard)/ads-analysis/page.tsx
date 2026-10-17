@@ -6,7 +6,7 @@ import { NeedsAttention } from "@/components/ads/needs-attention";
 import { UnifiedAdItem } from "@/types/analytics";
 import { AnomalyReport } from "@/lib/analytics/anomaly-detector";
 import { Select } from "@/components/ui/select";
-import { AdProvider } from "@prisma/client";
+import { AdProvider } from "@/types/analytics";
 import { Filter, Layers } from "lucide-react";
 
 export default function AdsAnalysisPage() {

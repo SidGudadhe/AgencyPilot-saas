@@ -163,7 +163,7 @@ export function ProviderTable({ data, currency = "INR" }: ProviderTableProps) {
       </div>
 
       <DataTable
-        columns={columns as ColumnDef<Record<string, unknown>>[]}
+        columns={columns as unknown as ColumnDef<Record<string, unknown>>[]}
         data={data as unknown as Record<string, unknown>[]}
         searchKey="providerName"
         searchPlaceholder="Filter providers..."

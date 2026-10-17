@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Select } from "@/components/ui/select";
-import { AdProvider } from "@prisma/client";
+import { AdProvider } from "@/types/analytics";
 import { RefreshCw, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 

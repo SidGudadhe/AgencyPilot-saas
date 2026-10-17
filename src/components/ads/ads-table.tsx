@@ -6,7 +6,6 @@ import { UnifiedAdItem } from "@/types/analytics";
 import { formatCurrency, formatNumber, formatPercent, formatROAS } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { AdDetailModal } from "./ad-detail-modal";
-import { AdStatus } from "@prisma/client";
 
 interface AdsTableProps {
   ads: UnifiedAdItem[];
@@ -43,9 +42,9 @@ export function AdsTable({ ads, currency = "INR" }: AdsTableProps) {
       sortable: true,
       align: "center",
       render: (row) => {
-        const isLive = row.status === AdStatus.ACTIVE;
-        const isPaused = row.status === AdStatus.PAUSED;
-        const isRejected = row.status === AdStatus.REJECTED;
+        const isLive = row.status === "ACTIVE";
+        const isPaused = row.status === "PAUSED";
+        const isRejected = row.status === "REJECTED";
 
         return (
           <Badge
@@ -162,7 +161,7 @@ export function AdsTable({ ads, currency = "INR" }: AdsTableProps) {
   return (
     <div className="space-y-4">
       <DataTable
-        columns={columns as ColumnDef<Record<string, unknown>>[]}
+        columns={columns as unknown as ColumnDef<Record<string, unknown>>[]}
         data={ads as unknown as Record<string, unknown>[]}
         searchKey="name"
         searchPlaceholder="Search ads by name or ID..."
