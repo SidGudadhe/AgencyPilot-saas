@@ -12,5 +12,75 @@
       "role": "OWNER",
       "theme": "light"
     }
+  },
+  {
+    "id": "usr_ek4gnj30",
+    "email": "flood_user_1_1792319289982@agencypilot.io",
+    "name": "Flood User 1",
+    "passwordHash": "$2a$12$FufoJZJ5.cz3IFWRHD22V.KtRMGITZmh0pw1.99HUtqVFU2QEyKmi",
+    "createdAt": "2026-10-18T10:28:14.462Z",
+    "workspace": {
+      "id": "ws_sn9fqkjr",
+      "name": "Flood User 1's Workspace",
+      "slug": "flood-user-1-s-workspace-pmid",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_mnrqlv4r",
+    "email": "flood_user_2_1792319294466@agencypilot.io",
+    "name": "Flood User 2",
+    "passwordHash": "$2a$12$WRz0o/O/I.KU8uI.28WemebAMf3klH/eFvKrl.3D8ruHhJqSigEpG",
+    "createdAt": "2026-10-18T10:28:18.985Z",
+    "workspace": {
+      "id": "ws_ssdxacrp",
+      "name": "Flood User 2's Workspace",
+      "slug": "flood-user-2-s-workspace-ebdx",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_44b3brr7",
+    "email": "flood_user_3_1792319298987@agencypilot.io",
+    "name": "Flood User 3",
+    "passwordHash": "$2a$12$SpSLB4IBBDDq41B4vj.6zeB0X0EtXYUwRvEUtc/QjKv8C9zLpOUvm",
+    "createdAt": "2026-10-18T10:28:23.381Z",
+    "workspace": {
+      "id": "ws_4dw0vezq",
+      "name": "Flood User 3's Workspace",
+      "slug": "flood-user-3-s-workspace-f7mj",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_gy6h4jpy",
+    "email": "flood_user_4_1792319303383@agencypilot.io",
+    "name": "Flood User 4",
+    "passwordHash": "$2a$12$TNPRuXGDRr2aKdee.0dMdOsJpqfDq49hi7cuzYH2tQNxV6s0SoolC",
+    "createdAt": "2026-10-18T10:28:28.005Z",
+    "workspace": {
+      "id": "ws_ypno8j0p",
+      "name": "Flood User 4's Workspace",
+      "slug": "flood-user-4-s-workspace-922j",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_hz6h5pj8",
+    "email": "flood_user_5_1792319308008@agencypilot.io",
+    "name": "Flood User 5",
+    "passwordHash": "$2a$12$fW18krK9tk6GD6FBh3H2We6fBe1iCrPaG80JghxSMUv1ZHJ0ORNA.",
+    "createdAt": "2026-10-18T10:28:32.407Z",
+    "workspace": {
+      "id": "ws_iwujcz1u",
+      "name": "Flood User 5's Workspace",
+      "slug": "flood-user-5-s-workspace-dhjc",
+      "role": "OWNER",
+      "theme": "dark"
+    }
   }
 ]

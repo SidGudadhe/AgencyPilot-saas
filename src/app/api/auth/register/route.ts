@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
 import { WorkspaceRole, SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 import { saveLocalUser, findLocalUserByEmail } from "@/lib/local-store";
+import { checkSlidingWindowRateLimit, getClientIp } from "@/lib/rate-limiter";
 import { z } from "zod";
 
 const registerSchema = z.object({
@@ -14,6 +15,22 @@ const registerSchema = z.object({
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req.headers);
+    const regLimit = checkSlidingWindowRateLimit(`register_ip:${ip}`, 5, 10 * 60 * 1000);
+    if (!regLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many accounts created from this IP. Please try again after 10 minutes." },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": String(regLimit.resetSeconds),
+            "X-RateLimit-Limit": String(regLimit.limit),
+            "X-RateLimit-Remaining": "0",
+          },
+        }
+      );
+    }
+
     const body = await req.json();
     const result = registerSchema.safeParse(body);
 

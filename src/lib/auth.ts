@@ -2,8 +2,14 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-
 import { findLocalUserByEmail } from "@/lib/local-store";
+import {
+  isLockedOut,
+  recordFailedAttempt,
+  resetRateLimit,
+  getClientIp,
+  getProgressiveDelayMs,
+} from "@/lib/rate-limiter";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -22,16 +28,59 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password are required");
         }
 
         const email = credentials.email.toLowerCase().trim();
+        const clientIp = getClientIp(req?.headers || {});
+        const ipKey = `auth_ip:${clientIp}`;
+        const emailKey = `auth_email:${email}`;
 
-        // 1. Try Prisma DB if available
+        // 1. Layer 3 Pre-Check: Is IP or Account in active 15-minute security lockout?
+        const ipStatus = isLockedOut(ipKey, 5);
+        const emailStatus = isLockedOut(emailKey, 5);
+
+        if (ipStatus.isLocked || emailStatus.isLocked) {
+          const activeStatus = emailStatus.isLocked ? emailStatus : ipStatus;
+          const minutesLeft = Math.max(1, Math.ceil(activeStatus.remainingSeconds / 60));
+          throw new Error(
+            `Too many login attempts. Account temporarily locked for security. Please try again after ${minutesLeft} minute${minutesLeft > 1 ? "s" : ""}.`
+          );
+        }
+
+        // Defensive Handler for failed authentication
+        const handleAuthFailure = async (): Promise<never> => {
+          const failedIp = recordFailedAttempt(ipKey, 5, 15 * 60 * 1000);
+          const failedEmail = recordFailedAttempt(emailKey, 5, 15 * 60 * 1000);
+          const worstStatus = failedEmail.isLocked ? failedEmail : failedIp;
+
+          // Progressive delay against automated timing bots
+          const delayMs = getProgressiveDelayMs(worstStatus.totalAttempts);
+          if (delayMs > 0) {
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+          }
+
+          if (worstStatus.isLocked) {
+            throw new Error(
+              "Too many login attempts. Account temporarily locked for security. Please try again after 15 minutes."
+            );
+          }
+
+          if (worstStatus.remainingAttempts <= 2) {
+            throw new Error(
+              `Invalid email or password. Warning: ${worstStatus.remainingAttempts} attempt${worstStatus.remainingAttempts > 1 ? "s" : ""} remaining before 15-minute security lockout.`
+            );
+          }
+
+          throw new Error("Invalid email or password");
+        };
+
+        // 2. Try Prisma DB if available
+        let user: any = null;
         try {
-          const user = await prisma.user.findUnique({
+          user = await prisma.user.findUnique({
             where: { email },
             include: {
               memberships: {
@@ -44,35 +93,38 @@ export const authOptions: NextAuthOptions = {
               },
             },
           });
-
-          if (user && user.passwordHash) {
-            const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
-            if (isValid) {
-              const defaultWorkspace = user.memberships[0]?.workspace;
-              return {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                image: user.image,
-                activeWorkspaceId: defaultWorkspace?.id || null,
-              };
-            } else {
-              throw new Error("Invalid email or password");
-            }
-          }
         } catch (dbErr: unknown) {
-          // If error was explicitly "Invalid email or password", rethrow
-          if (dbErr instanceof Error && dbErr.message === "Invalid email or password") {
-            throw dbErr;
-          }
-          console.warn("Database unavailable during login, falling back to local store:", (dbErr as Error).message);
+          console.warn(
+            "Database unavailable during login, falling back to local store:",
+            (dbErr as Error).message
+          );
         }
 
-        // 2. High-availability local store fallback
+        if (user && user.passwordHash) {
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+          if (isValid) {
+            resetRateLimit(ipKey);
+            resetRateLimit(emailKey);
+            const defaultWorkspace = user.memberships[0]?.workspace;
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              image: user.image,
+              activeWorkspaceId: defaultWorkspace?.id || null,
+            };
+          } else {
+            return await handleAuthFailure();
+          }
+        }
+
+        // 3. High-availability local store fallback
         const localUser = findLocalUserByEmail(email);
         if (localUser && localUser.passwordHash) {
           const isValid = await bcrypt.compare(credentials.password, localUser.passwordHash);
           if (isValid) {
+            resetRateLimit(ipKey);
+            resetRateLimit(emailKey);
             return {
               id: localUser.id,
               email: localUser.email,
@@ -80,10 +132,13 @@ export const authOptions: NextAuthOptions = {
               image: null,
               activeWorkspaceId: localUser.workspace.id,
             };
+          } else {
+            return await handleAuthFailure();
           }
         }
 
-        throw new Error("Invalid email or password");
+        // If user not found in DB or local store
+        return await handleAuthFailure();
       },
     }),
   ],

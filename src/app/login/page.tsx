@@ -7,7 +7,8 @@ import { signIn } from "next-auth/react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Zap, AlertCircle } from "lucide-react";
+import { Zap, AlertCircle, ShieldAlert } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -58,9 +59,20 @@ export default function LoginPage() {
 
         <CardContent>
           {error && (
-            <div className="mb-4 flex items-center space-x-2 rounded-lg bg-red-950/50 p-3 text-xs text-red-400 border border-red-500/30">
-              <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{error}</span>
+            <div
+              className={cn(
+                "mb-4 flex items-start space-x-2.5 rounded-lg p-3 text-xs border",
+                error.includes("locked") || error.includes("Too many") || error.includes("Warning")
+                  ? "bg-amber-950/50 text-amber-300 border-amber-500/40"
+                  : "bg-red-950/50 text-red-400 border-red-500/30"
+              )}
+            >
+              {error.includes("locked") || error.includes("Too many") || error.includes("Warning") ? (
+                <ShieldAlert className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+              )}
+              <span className="leading-relaxed">{error}</span>
             </div>
           )}
 
