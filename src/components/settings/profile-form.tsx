@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -21,6 +21,13 @@ export function ProfileForm({ initialName, email }: ProfileFormProps) {
   const router = useRouter();
   const { update } = useSession();
 
+  // Synchronize state when session loads asynchronously
+  useEffect(() => {
+    if (initialName) {
+      setName(initialName);
+    }
+  }, [initialName]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -38,11 +45,23 @@ export function ProfileForm({ initialName, email }: ProfileFormProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update profile");
 
+      const savedName = data.user?.name || name.trim();
+      setName(savedName);
+
       toast.success("Profile updated successfully");
+
+      // Broadcast update event so Sidebar and Navigation immediately re-render with new name
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("agency-pilot-profile-updated", {
+            detail: { name: savedName },
+          })
+        );
+      }
 
       // Update client session name and trigger server component refresh
       try {
-        await update({ name: data.user?.name || name.trim() });
+        await update({ name: savedName, user: { name: savedName } });
       } catch {
         // Session update is best effort
       }

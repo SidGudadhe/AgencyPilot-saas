@@ -52,17 +52,16 @@ export async function PATCH(req: Request) {
       console.warn("Prisma user update failed, checking local store fallback:", (dbErr as Error).message);
     }
 
-    // 2. If not updated via Prisma, update in high-availability local store
-    if (!updatedUser) {
-      const identifier = userId || userEmail || "";
-      const localUpdated = updateLocalUserProfile(identifier, trimmedName);
-      if (localUpdated) {
-        updatedUser = {
-          id: localUpdated.id,
-          name: localUpdated.name,
-          email: localUpdated.email,
-        };
-      }
+    // 2. Always update local store so local JSON and session lookups stay 100% in sync
+    const identifier = userId || userEmail || "";
+    const localUpdated = updateLocalUserProfile(identifier, trimmedName);
+
+    if (!updatedUser && localUpdated) {
+      updatedUser = {
+        id: localUpdated.id,
+        name: localUpdated.name,
+        email: localUpdated.email,
+      };
     }
 
     if (!updatedUser) {

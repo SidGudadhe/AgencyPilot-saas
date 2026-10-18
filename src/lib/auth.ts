@@ -2,7 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { findLocalUserByEmail } from "@/lib/local-store";
+import { findLocalUserByEmail, findLocalUserById } from "@/lib/local-store";
 import {
   isLockedOut,
   recordFailedAttempt,
@@ -146,12 +146,33 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
         token.activeWorkspaceId = (user as unknown as { activeWorkspaceId?: string }).activeWorkspaceId;
       }
 
-      // Allow updating workspace context dynamically via session update
-      if (trigger === "update" && session?.activeWorkspaceId) {
-        token.activeWorkspaceId = session.activeWorkspaceId;
+      // Allow updating workspace context and user profile dynamically via session update
+      if (trigger === "update") {
+        if (session?.activeWorkspaceId) {
+          token.activeWorkspaceId = session.activeWorkspaceId;
+        }
+        if (session?.name) {
+          token.name = session.name;
+        } else if (session?.user?.name) {
+          token.name = session.user.name;
+        }
+      }
+
+      // Look up fresh user name from local store to guarantee persistent sync across sessions
+      if (token.id) {
+        const local = findLocalUserById(token.id as string);
+        if (local?.name) {
+          token.name = local.name;
+        }
+      } else if (token.email) {
+        const local = findLocalUserByEmail(token.email as string);
+        if (local?.name) {
+          token.name = local.name;
+        }
       }
 
       return token;
@@ -159,6 +180,14 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        const localUser =
+          (token.id ? findLocalUserById(token.id as string) : null) ||
+          (session.user.email ? findLocalUserByEmail(session.user.email) : null);
+        if (localUser?.name) {
+          session.user.name = localUser.name;
+        } else if (token.name) {
+          session.user.name = token.name as string;
+        }
         (session.user as unknown as { activeWorkspaceId?: string }).activeWorkspaceId =
           token.activeWorkspaceId as string;
       }

@@ -18,6 +18,30 @@ export default function DashboardLayout({
   const router = useRouter();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRangePreset>("30d");
+  const [currentUserName, setCurrentUserName] = useState<string | null | undefined>(
+    session?.user?.name
+  );
+
+  // Synchronize state when session changes
+  React.useEffect(() => {
+    if (session?.user?.name) {
+      setCurrentUserName(session.user.name);
+    }
+  }, [session?.user?.name]);
+
+  // Reactive listener for immediate profile updates across components without page reload
+  React.useEffect(() => {
+    const handleProfileUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ name: string }>;
+      if (customEvent.detail?.name) {
+        setCurrentUserName(customEvent.detail.name);
+      }
+    };
+    window.addEventListener("agency-pilot-profile-updated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("agency-pilot-profile-updated", handleProfileUpdate);
+    };
+  }, []);
 
   // Protect client side while NextAuth evaluates
   React.useEffect(() => {
@@ -37,13 +61,15 @@ export default function DashboardLayout({
     );
   }
 
+  const activeUserName = currentUserName || session?.user?.name;
+
   return (
     <WorkspaceThemeProvider>
       <div className="flex h-screen overflow-hidden bg-[#090d16]">
         {/* Desktop Persistent Sidebar */}
         <Sidebar
           workspaceName="Personal Workspace"
-          userName={session?.user?.name}
+          userName={activeUserName}
           userEmail={session?.user?.email}
           className="hidden md:flex shrink-0"
         />
@@ -53,7 +79,7 @@ export default function DashboardLayout({
           isOpen={mobileNavOpen}
           onClose={() => setMobileNavOpen(false)}
           workspaceName="Personal Workspace"
-          userName={session?.user?.name}
+          userName={activeUserName}
           userEmail={session?.user?.email}
         />
 

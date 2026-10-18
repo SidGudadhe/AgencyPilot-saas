@@ -2,7 +2,7 @@
   {
     "id": "usr_admin_default",
     "email": "admin@agencypilot.io",
-    "name": "AgencyPilot Admin",
+    "name": "Sid plotform ads",
     "passwordHash": "$2a$10$wrV3YRyYVpw8KYIFJjFmfeyKqen.hFzXSG5HozhgHs5MnsbJA6pnK",
     "createdAt": "2026-10-17T17:01:13.277Z",
     "workspace": {
@@ -121,6 +121,48 @@
       "id": "ws_nmmxo2y3",
       "name": "Test Workspace",
       "slug": "test-workspace-b44c",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_c2ykgo26",
+    "email": "profile_test_1792333403503@agencypilot.io",
+    "name": "Second Update By Email",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T14:23:23.507Z",
+    "workspace": {
+      "id": "ws_p12w3jt2",
+      "name": "Test Workspace",
+      "slug": "test-workspace-gioi",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_d2rxjksw",
+    "email": "profile_test_1792340748065@agencypilot.io",
+    "name": "Second Update By Email",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T16:25:48.068Z",
+    "workspace": {
+      "id": "ws_bqq2ut0m",
+      "name": "Test Workspace",
+      "slug": "test-workspace-7asc",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_n540q3m1",
+    "email": "profile_test_1792340871048@agencypilot.io",
+    "name": "Sid plotform ads",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T16:27:51.056Z",
+    "workspace": {
+      "id": "ws_adjc6fx8",
+      "name": "Test Workspace",
+      "slug": "test-workspace-reb2",
       "role": "OWNER",
       "theme": "dark"
     }

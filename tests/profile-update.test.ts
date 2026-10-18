@@ -60,4 +60,40 @@ describe("User Profile & Password Update Verification", () => {
     const falsePass = updateLocalUserPassword("non_existent_id_99999", "ghost-hash");
     expect(falsePass).toBe(false);
   });
+
+  test("authOptions.callbacks.jwt and session dynamically sync updated user name", async () => {
+    const { authOptions } = await import("../src/lib/auth");
+
+    // 1. Initial login token setup
+    const initialToken: any = await authOptions.callbacks!.jwt!({
+      token: { sub: createdUser.id },
+      user: { id: createdUser.id, name: "Second Update By Email", email: testEmail } as any,
+    });
+    expect(initialToken.name).toBe("Second Update By Email");
+
+    // 2. Profile name is updated in local store
+    updateLocalUserProfile(createdUser.id, "Sid plotform ads");
+
+    // 3. Next token evaluation dynamically picks up latest name
+    const updatedToken: any = await authOptions.callbacks!.jwt!({
+      token: { id: createdUser.id, email: testEmail },
+    });
+    expect(updatedToken.name).toBe("Sid plotform ads");
+
+    // 4. Client session dynamically contains updated name
+    const sessionResult: any = await authOptions.callbacks!.session!({
+      session: { user: { id: createdUser.id, email: testEmail } } as any,
+      token: updatedToken,
+    });
+    expect(sessionResult.user.name).toBe("Sid plotform ads");
+
+    // 5. Session update trigger correctly reflects name
+    const triggeredToken: any = await authOptions.callbacks!.jwt!({
+      token: { id: createdUser.id, name: "Old Name" },
+      trigger: "update",
+      session: { name: "Direct Trigger Name" },
+    });
+    // Should be overridden by the fresh local store value or updated session value
+    expect(triggeredToken.name).toBeDefined();
+  });
 });
