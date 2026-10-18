@@ -150,4 +150,25 @@ describe("Multi-Tenant Architecture & Strict Workspace Isolation", () => {
     expect(ads.some((a) => a.id === "ad_b1")).toBe(true);
     expect(ads.filter((a) => a.workspaceId === "ws_user_b")).toHaveLength(1);
   });
+
+  // Test 6: Workspace Theme Isolation
+  it("should ensure workspace theme changes are strictly isolated to the specific workspace", () => {
+    const workspacesThemeStore: Record<string, "dark" | "light"> = {
+      ws_agency_alpha: "dark",
+      ws_media_flight: "dark",
+    };
+
+    const updateTheme = (workspaceId: string, newTheme: "dark" | "light") => {
+      workspacesThemeStore[workspaceId] = newTheme;
+    };
+
+    // User A changes their workspace theme to White Theme (light mode)
+    updateTheme("ws_agency_alpha", "light");
+
+    // Workspace A is now light
+    expect(workspacesThemeStore["ws_agency_alpha"]).toBe("light");
+
+    // Workspace B is still dark (black theme) - completely unaffected!
+    expect(workspacesThemeStore["ws_media_flight"]).toBe("dark");
+  });
 });

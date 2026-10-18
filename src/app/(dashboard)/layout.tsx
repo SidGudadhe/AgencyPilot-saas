@@ -7,6 +7,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { DateRangePreset } from "@/components/ui/date-range-picker";
+import { WorkspaceThemeProvider } from "@/contexts/workspace-theme-context";
 
 export default function DashboardLayout({
   children,
@@ -37,37 +38,39 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#090d16]">
-      {/* Desktop Persistent Sidebar */}
-      <Sidebar
-        workspaceName="Personal Workspace"
-        userName={session?.user?.name}
-        userEmail={session?.user?.email}
-        className="hidden md:flex shrink-0"
-      />
-
-      {/* Mobile Drawer */}
-      <MobileNav
-        isOpen={mobileNavOpen}
-        onClose={() => setMobileNavOpen(false)}
-        workspaceName="Personal Workspace"
-        userName={session?.user?.name}
-        userEmail={session?.user?.email}
-      />
-
-      {/* Main Content Area */}
-      <div className="flex flex-1 flex-col overflow-y-auto">
-        <Header
+    <WorkspaceThemeProvider>
+      <div className="flex h-screen overflow-hidden bg-[#090d16]">
+        {/* Desktop Persistent Sidebar */}
+        <Sidebar
           workspaceName="Personal Workspace"
-          role="OWNER"
-          dateRange={dateRange}
-          onDateRangeChange={(p) => setDateRange(p)}
-          onMobileMenuToggle={() => setMobileNavOpen(true)}
+          userName={session?.user?.name}
+          userEmail={session?.user?.email}
+          className="hidden md:flex shrink-0"
         />
-        <main className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
-          {children}
-        </main>
+
+        {/* Mobile Drawer */}
+        <MobileNav
+          isOpen={mobileNavOpen}
+          onClose={() => setMobileNavOpen(false)}
+          workspaceName="Personal Workspace"
+          userName={session?.user?.name}
+          userEmail={session?.user?.email}
+        />
+
+        {/* Main Content Area */}
+        <div className="flex flex-1 flex-col overflow-y-auto">
+          <Header
+            workspaceName="Personal Workspace"
+            role="OWNER"
+            dateRange={dateRange}
+            onDateRangeChange={(p) => setDateRange(p)}
+            onMobileMenuToggle={() => setMobileNavOpen(true)}
+          />
+          <main className="flex-1 p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </WorkspaceThemeProvider>
   );
 }

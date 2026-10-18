@@ -3,7 +3,8 @@
 import React from "react";
 import { DateRangePicker, DateRangePreset } from "@/components/ui/date-range-picker";
 import { Badge } from "@/components/ui/badge";
-import { Menu, ShieldCheck } from "lucide-react";
+import { Menu, ShieldCheck, Moon, Sun } from "lucide-react";
+import { useWorkspaceTheme } from "@/contexts/workspace-theme-context";
 
 interface HeaderProps {
   workspaceName?: string;
@@ -24,6 +25,8 @@ export function Header({
   currency = "INR",
   lastSyncAt,
 }: HeaderProps) {
+  const { theme, toggleTheme } = useWorkspaceTheme();
+
   return (
     <header className="sticky top-0 z-40 flex h-16 w-full items-center justify-between border-b border-slate-800 bg-[#090d16]/90 px-6 backdrop-blur-md">
       {/* Left: Mobile Toggle & Workspace Title */}
@@ -45,7 +48,7 @@ export function Header({
         </div>
       </div>
 
-      {/* Right: Global Date Picker, Currency, Sync Status */}
+      {/* Right: Global Date Picker, Currency, Sync Status & Theme Toggle */}
       <div className="flex items-center space-x-3">
         {lastSyncAt ? (
           <span className="hidden lg:inline-flex text-[11px] text-slate-400 font-mono items-center">
@@ -64,6 +67,19 @@ export function Header({
         </div>
 
         <DateRangePicker value={dateRange} onChange={onDateRangeChange} />
+
+        {/* Workspace Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          title={theme === "dark" ? "Switch this workspace to White Theme (Light Mode)" : "Switch this workspace to Black Theme (Dark Mode)"}
+          className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700 hover:text-white transition-all shadow-xs"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-4 w-4 text-amber-400" />
+          ) : (
+            <Moon className="h-4 w-4 text-slate-700" />
+          )}
+        </button>
       </div>
     </header>
   );

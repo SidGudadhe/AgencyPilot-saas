@@ -9,7 +9,8 @@
       "id": "ws_primary_agency",
       "name": "Primary Agency Workspace",
       "slug": "primary-agency",
-      "role": "OWNER"
+      "role": "OWNER",
+      "theme": "dark"
     }
   }
 ]

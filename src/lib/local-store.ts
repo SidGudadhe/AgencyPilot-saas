@@ -13,6 +13,7 @@ export interface LocalUserRecord {
     name: string;
     slug: string;
     role: WorkspaceRole;
+    theme?: "dark" | "light";
   };
 }
 
@@ -28,6 +29,7 @@ export const DEFAULT_ADMIN: LocalUserRecord = {
     name: "Primary Agency Workspace",
     slug: "primary-agency",
     role: WorkspaceRole.OWNER,
+    theme: "dark",
   },
 };
 
@@ -73,6 +75,37 @@ export function findLocalUserById(id: string): LocalUserRecord | null {
   return users.find((u) => u.id === id) || null;
 }
 
+export function getWorkspaceTheme(workspaceId: string): "dark" | "light" {
+  const users = getLocalUsers();
+  const found = users.find((u) => u.workspace.id === workspaceId);
+  return found?.workspace.theme || "dark";
+}
+
+export function updateWorkspaceTheme(workspaceId: string, theme: "dark" | "light"): boolean {
+  const users = getLocalUsers();
+  let updated = false;
+
+  for (const user of users) {
+    if (user.workspace.id === workspaceId) {
+      user.workspace.theme = theme;
+      updated = true;
+    }
+  }
+
+  if (updated) {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf8");
+    } catch (err) {
+      console.error("Failed persisting workspace theme update locally:", err);
+    }
+  }
+
+  return updated;
+}
+
 export function saveLocalUser(userData: {
   name: string;
   email: string;
@@ -107,6 +140,7 @@ export function saveLocalUser(userData: {
       name: wsName,
       slug,
       role: WorkspaceRole.OWNER,
+      theme: "dark",
     },
   };
 

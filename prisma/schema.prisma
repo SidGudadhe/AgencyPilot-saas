@@ -160,6 +160,7 @@ model Workspace {
   name      String
   slug      String   @unique
   ownerId   String
+  theme     String   @default("dark")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

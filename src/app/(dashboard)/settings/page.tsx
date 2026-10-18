@@ -5,16 +5,17 @@ import { ProfileForm } from "@/components/settings/profile-form";
 import { PasswordForm } from "@/components/settings/password-form";
 import { TeamManagement, TeamMember } from "@/components/settings/team-management";
 import { BillingSection } from "@/components/settings/billing-section";
+import { WorkspaceThemeSettings } from "@/components/settings/workspace-theme-settings";
 import { DeleteAccountModal } from "@/components/settings/delete-account-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useSession } from "next-auth/react";
-import { AlertTriangle, User, Key, Users, CreditCard, Trash2 } from "lucide-react";
+import { AlertTriangle, User, Key, Users, CreditCard, Trash2, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<"profile" | "team" | "billing" | "security">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "appearance" | "team" | "billing" | "security">("profile");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [isOwner, setIsOwner] = useState(true);
@@ -40,6 +41,7 @@ export default function SettingsPage() {
 
   const navItems = [
     { id: "profile", label: "Profile", icon: User },
+    { id: "appearance", label: "Workspace Theme", icon: Palette },
     { id: "team", label: "Team Management", icon: Users },
     { id: "billing", label: "Billing & Plans", icon: CreditCard },
     { id: "security", label: "Security & Password", icon: Key },
@@ -99,6 +101,10 @@ export default function SettingsPage() {
               initialName={session?.user?.name}
               email={session?.user?.email}
             />
+          )}
+
+          {activeTab === "appearance" && (
+            <WorkspaceThemeSettings workspaceName="Primary Agency Workspace" />
           )}
 
           {activeTab === "team" && (
