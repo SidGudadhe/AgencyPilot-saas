@@ -141,7 +141,7 @@ export default function ProviderConnectionsPage() {
 
       {/* ─── Telemetry Summary KPI Cards ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl border border-slate-800 bg-[#0d1424] p-4 space-y-1">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/80 p-4 space-y-1 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
             Connected Accounts
           </p>
@@ -153,7 +153,7 @@ export default function ProviderConnectionsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-[#0d1424] p-4 space-y-1">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/80 p-4 space-y-1 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center space-x-1">
             <CheckCircle2 className="h-3 w-3 text-emerald-400" />
             <span>Active Connections</span>
@@ -166,7 +166,7 @@ export default function ProviderConnectionsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-[#0d1424] p-4 space-y-1">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/80 p-4 space-y-1 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center space-x-1">
             <AlertTriangle className="h-3 w-3 text-amber-400" />
             <span>Requires Attention</span>
@@ -179,7 +179,7 @@ export default function ProviderConnectionsPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-800 bg-[#0d1424] p-4 space-y-1">
+        <div className="rounded-xl border border-slate-800/80 bg-slate-900/80 p-4 space-y-1 shadow-sm">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 flex items-center space-x-1">
             <Sparkles className="h-3 w-3 text-brand-400" />
             <span>Available Providers</span>
@@ -242,7 +242,7 @@ export default function ProviderConnectionsPage() {
               placeholder="Search providers..."
               value={providerSearch}
               onChange={(e) => setProviderSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-800 bg-[#0d1424] py-1.5 pl-8 pr-3 text-xs text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none"
+              className="w-full rounded-lg border border-slate-800 bg-slate-900/90 py-1.5 pl-8 pr-3 text-xs text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none"
             />
           </div>
         </div>

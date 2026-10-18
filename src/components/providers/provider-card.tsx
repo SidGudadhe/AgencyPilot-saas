@@ -70,7 +70,7 @@ export function ProviderCard({
   const isAvailable = provider.readiness === "AVAILABLE";
 
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-slate-800 bg-[#0d1424] p-5 transition-all hover:border-slate-700/80 shadow-sm">
+    <div className="flex flex-col justify-between rounded-xl border border-slate-800/80 bg-slate-900/80 p-5 transition-all hover:border-slate-700/80 shadow-sm">
       {/* Top Header */}
       <div className="space-y-3">
         <div className="flex items-start justify-between">

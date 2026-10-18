@@ -67,7 +67,12 @@ select option {
   background-color: #f8fafc !important;
 }
 
-[data-theme="light"] .bg-\[\#0b1120\] {
+[data-theme="light"] .bg-\[\#0b1120\],
+.theme-light .bg-\[\#0b1120\],
+[data-theme="light"] .bg-\[\#0d1424\],
+.theme-light .bg-\[\#0d1424\],
+[data-theme="light"] .bg-\[\#120a0f\],
+.theme-light .bg-\[\#120a0f\] {
   background-color: #ffffff !important;
 }
 
@@ -215,40 +220,99 @@ select option {
   border-color: #93c5fd !important;
 }
 
-[data-theme="light"] .bg-emerald-500\/10 {
+[data-theme="light"] .bg-emerald-500\/10,
+.theme-light .bg-emerald-500\/10 {
   background-color: #ecfdf5 !important;
   color: #065f46 !important;
   border-color: #a7f3d0 !important;
 }
 
+[data-theme="light"] .bg-amber-500\/10,
+.theme-light .bg-amber-500\/10 {
+  background-color: #fffbeb !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+
+[data-theme="light"] .bg-blue-500\/10,
+.theme-light .bg-blue-500\/10 {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+[data-theme="light"] .bg-purple-500\/10,
+.theme-light .bg-purple-500\/10 {
+  background-color: #faf5ff !important;
+  color: #6b21a8 !important;
+  border-color: #e9d5ff !important;
+}
+
+[data-theme="light"] .bg-red-500\/10,
+.theme-light .bg-red-500\/10 {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
+}
+
 /* Semantic text contrast in Light Mode */
-[data-theme="light"] .text-emerald-400 {
+[data-theme="light"] .text-emerald-400,
+.theme-light .text-emerald-400,
+[data-theme="light"] .text-emerald-300,
+.theme-light .text-emerald-300 {
   color: #047857 !important;
 }
 
-[data-theme="light"] .text-red-400 {
+[data-theme="light"] .text-red-400,
+.theme-light .text-red-400 {
   color: #b91c1c !important;
 }
 
-[data-theme="light"] .text-amber-400 {
+[data-theme="light"] .text-amber-400,
+.theme-light .text-amber-400,
+[data-theme="light"] .text-amber-300,
+.theme-light .text-amber-300 {
   color: #b45309 !important;
 }
 
-[data-theme="light"] .text-amber-200 {
+[data-theme="light"] .text-amber-200,
+.theme-light .text-amber-200 {
   color: #78350f !important;
 }
 
-[data-theme="light"] .text-brand-400 {
+[data-theme="light"] .text-brand-400,
+.theme-light .text-brand-400,
+[data-theme="light"] .text-brand-300,
+.theme-light .text-brand-300,
+[data-theme="light"] .text-blue-400,
+.theme-light .text-blue-400,
+[data-theme="light"] .text-blue-300,
+.theme-light .text-blue-300 {
   color: #1d4ed8 !important;
 }
 
-[data-theme="light"] .bg-brand-500\/10 {
+[data-theme="light"] .text-purple-400,
+.theme-light .text-purple-400,
+[data-theme="light"] .text-purple-300,
+.theme-light .text-purple-300 {
+  color: #6b21a8 !important;
+}
+
+[data-theme="light"] .bg-brand-500\/10,
+.theme-light .bg-brand-500\/10 {
   background-color: #eff6ff !important;
 }
 
 [data-theme="light"] .border-brand-500\/20,
-[data-theme="light"] .border-brand-500\/30 {
+[data-theme="light"] .border-brand-500\/30,
+.theme-light .border-brand-500\/20,
+.theme-light .border-brand-500\/30 {
   border-color: #bfdbfe !important;
+}
+
+[data-theme="light"] .border-red-900\/60,
+.theme-light .border-red-900\/60 {
+  border-color: #fecaca !important;
 }
 
 /* AI Chat in Light Mode */
@@ -298,13 +362,28 @@ select option {
 
 /* Hover States */
 [data-theme="light"] .hover\:bg-slate-800\/60:hover,
+[data-theme="light"] .hover\:bg-slate-800\/50:hover,
+[data-theme="light"] .hover\:bg-slate-800\/40:hover,
 [data-theme="light"] .hover\:bg-slate-800:hover,
-[data-theme="light"] .hover\:bg-slate-900:hover {
+[data-theme="light"] .hover\:bg-slate-900:hover,
+[data-theme="light"] .hover\:bg-slate-850\/60:hover,
+[data-theme="light"] .hover\:bg-slate-850\/50:hover,
+.theme-light .hover\:bg-slate-850\/60:hover,
+.theme-light .hover\:bg-slate-850\/50:hover {
+  background-color: #f1f5f9 !important;
+}
+
+[data-theme="light"] .bg-slate-850\/50,
+[data-theme="light"] .bg-slate-850\/60,
+.theme-light .bg-slate-850\/50,
+.theme-light .bg-slate-850\/60 {
   background-color: #f1f5f9 !important;
 }
 
 [data-theme="light"] .hover\:text-white:hover,
-[data-theme="light"] .hover\:text-slate-100:hover {
+[data-theme="light"] .hover\:text-slate-100:hover,
+.theme-light .hover\:text-white:hover,
+.theme-light .hover\:text-slate-100:hover {
   color: #0f172a !important;
 }
 

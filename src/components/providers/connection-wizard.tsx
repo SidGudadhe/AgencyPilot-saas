@@ -306,7 +306,7 @@ export function ConnectionWizard({
                   <button
                     key={prov.key}
                     onClick={() => handleSelectProvider(prov)}
-                    className="flex items-start space-x-3 rounded-xl border border-slate-800 bg-[#0d1424] p-4 text-left hover:border-brand-500/60 transition-all hover:bg-slate-850/60"
+                    className="flex items-start space-x-3 rounded-xl border border-slate-800/80 bg-slate-900/80 p-4 text-left hover:border-brand-500/60 transition-all hover:bg-slate-800/60 shadow-sm"
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-white font-bold text-sm shrink-0 border border-slate-700">
                       {prov.displayName.slice(0, 2).toUpperCase()}
@@ -496,7 +496,7 @@ export function ConnectionWizard({
                       className={`p-3 flex items-center justify-between transition-colors ${
                         isAlready
                           ? "opacity-50 cursor-not-allowed bg-slate-900/30"
-                          : "hover:bg-slate-850/60 cursor-pointer"
+                          : "hover:bg-slate-800/60 cursor-pointer"
                       }`}
                     >
                       <div className="flex items-center space-x-3">

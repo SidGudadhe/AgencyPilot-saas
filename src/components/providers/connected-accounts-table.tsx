@@ -132,7 +132,7 @@ export function ConnectedAccountsTable({
             placeholder="Search accounts or IDs..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-lg border border-slate-800 bg-[#0d1424] py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none"
+            className="w-full rounded-lg border border-slate-800 bg-slate-900/90 py-2 pl-9 pr-3 text-xs text-white placeholder-slate-500 focus:border-brand-500 focus:outline-none"
           />
         </div>
 
@@ -140,7 +140,7 @@ export function ConnectedAccountsTable({
           <select
             value={selectedProviderFilter}
             onChange={(e) => setSelectedProviderFilter(e.target.value)}
-            className="rounded-lg border border-slate-800 bg-[#0d1424] px-3 py-2 text-xs text-slate-300 focus:border-brand-500 focus:outline-none"
+            className="rounded-lg border border-slate-800 bg-slate-900/90 px-3 py-2 text-xs text-slate-300 focus:border-brand-500 focus:outline-none"
           >
             <option value="ALL">All Providers</option>
             <option value="META">Meta Ads</option>
@@ -150,7 +150,7 @@ export function ConnectedAccountsTable({
           <select
             value={selectedStatusFilter}
             onChange={(e) => setSelectedStatusFilter(e.target.value)}
-            className="rounded-lg border border-slate-800 bg-[#0d1424] px-3 py-2 text-xs text-slate-300 focus:border-brand-500 focus:outline-none"
+            className="rounded-lg border border-slate-800 bg-slate-900/90 px-3 py-2 text-xs text-slate-300 focus:border-brand-500 focus:outline-none"
           >
             <option value="ALL">All Statuses</option>
             <option value="CONNECTED">Connected</option>
@@ -161,7 +161,7 @@ export function ConnectedAccountsTable({
       </div>
 
       {/* Table / List Container */}
-      <div className="rounded-xl border border-slate-800 bg-[#0d1424] overflow-hidden shadow-sm">
+      <div className="rounded-xl border border-slate-800/80 bg-slate-900/80 overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="py-16 text-center text-slate-400 text-xs">
             Loading connected accounts telemetry...
@@ -208,7 +208,7 @@ export function ConnectedAccountsTable({
                   <tr
                     key={acc.id}
                     onClick={() => setActiveDetailId(acc.id)}
-                    className="hover:bg-slate-850/50 cursor-pointer transition-colors"
+                    className="hover:bg-slate-800/50 cursor-pointer transition-colors"
                   >
                     {/* Account & Provider */}
                     <td className="py-3.5 px-4">

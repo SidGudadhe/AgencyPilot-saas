@@ -40,7 +40,7 @@ export function DisconnectConfirmModal({
       onClose={onClose}
       title="Disconnect Advertising Account?"
       description={`You are about to disconnect ${accountName} (${maskedAccountId})`}
-      className="max-w-md border-red-900/60 bg-[#120a0f]"
+      className="max-w-md border-red-900/60 bg-slate-900"
     >
       <div className="space-y-4 text-xs text-slate-300">
         <div className="flex items-start space-x-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-300">
