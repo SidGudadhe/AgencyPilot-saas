@@ -3,8 +3,7 @@
 import React, { useState } from "react";
 import { useWorkspaceTheme } from "@/contexts/workspace-theme-context";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Moon, Sun, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WorkspaceThemeSettingsProps {
@@ -50,9 +49,6 @@ export function WorkspaceThemeSettings({ workspaceName = "Active Workspace" }: W
                 <span className="font-semibold text-slate-200">{workspaceName}</span>.
               </CardDescription>
             </div>
-            <Badge variant="outline" className="text-[10px] font-mono uppercase">
-              Isolated Per Workspace
-            </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -185,19 +181,6 @@ export function WorkspaceThemeSettings({ workspaceName = "Active Workspace" }: W
                   <CheckCircle2 className="h-4 w-4 text-brand-400 shrink-0 mt-0.5 ml-2" />
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Privacy & Workspace Isolation Note */}
-          <div className="flex items-start space-x-2.5 rounded-lg border border-slate-800 bg-slate-950/40 p-3.5 text-xs text-slate-400">
-            <ShieldCheck className="h-4 w-4 text-brand-400 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="font-medium text-slate-200">
-                Workspace Isolation Guarantee
-              </p>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Your theme preference is saved strictly to this workspace. Other workspaces and other team members will retain their own theme configuration without any cross-tenant changes.
-              </p>
             </div>
           </div>
         </CardContent>

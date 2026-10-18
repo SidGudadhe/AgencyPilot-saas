@@ -79,7 +79,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex items-center space-x-1.5 text-xs text-emerald-400 bg-emerald-950/30 px-2.5 py-1 rounded border border-emerald-500/20 font-mono">
+        <div className="flex items-center space-x-1.5 text-xs px-2.5 py-1 rounded border font-mono real-data-pill">
           <ShieldCheck className="h-3.5 w-3.5" />
           <span>Real Data Only • Zero Synthetic Metrics</span>
         </div>

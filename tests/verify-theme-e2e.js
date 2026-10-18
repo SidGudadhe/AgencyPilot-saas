@@ -91,7 +91,7 @@ class SimpleCDP {
 }
 
 async function main() {
-  console.log("=== Starting End-to-End Theme Verification ===");
+  console.log("=== Starting Comprehensive End-to-End Theme Verification ===");
 
   // 1. Obtain Authenticated Session via NextAuth credentials
   console.log("Fetching CSRF and authenticating session for admin@agencypilot.io...");
@@ -176,9 +176,6 @@ async function main() {
     await cdp.send("Page.navigate", { url: "http://localhost:3000/settings" });
     await sleep(3000);
 
-    const initialUrl = await cdp.evaluate("window.location.href");
-    console.log("Current URL in settings:", initialUrl);
-
     // 4. Click on 'Workspace Theme' tab
     console.log("Clicking 'Workspace Theme' tab...");
     await cdp.evaluate(`
@@ -186,6 +183,16 @@ async function main() {
       if (themeTab) themeTab.click();
     `);
     await sleep(1500);
+
+    // Verify the 2 removed boxes do NOT exist
+    const hasGuaranteeBox = await cdp.evaluate(`
+      document.body.innerText.includes("Workspace Isolation Guarantee") ||
+      document.body.innerText.includes("Isolated Per Workspace")
+    `);
+    console.log("Assertion: Workspace Isolation Guarantee & Isolated Per Workspace boxes removed:", !hasGuaranteeBox);
+    if (hasGuaranteeBox) {
+      throw new Error("FAILED: The 2 requested isolation guarantee boxes/badges are still present in DOM!");
+    }
 
     // 5. Click on 'White Theme (Light Mode)' card
     console.log("Selecting 'White Theme (Light Mode)'...");
@@ -211,9 +218,48 @@ async function main() {
 
     const dashboardTheme = await cdp.evaluate("document.documentElement.getAttribute('data-theme')");
     console.log("Dashboard Theme verified:", dashboardTheme);
+
+    // Verify Real Data Pill Visibility & Contrast
+    const pillMetrics = await cdp.evaluate(`
+      (() => {
+        const pill = document.querySelector('.real-data-pill');
+        if (!pill) return { found: false };
+        const style = window.getComputedStyle(pill);
+        return {
+          found: true,
+          text: pill.innerText.trim(),
+          color: style.color,
+          backgroundColor: style.backgroundColor,
+          borderColor: style.borderColor,
+          fontWeight: style.fontWeight
+        };
+      })()
+    `);
+    console.log("Real Data Pill computed metrics:", pillMetrics);
+    if (!pillMetrics.found || !pillMetrics.text.includes("Real Data Only • Zero Synthetic Metrics")) {
+      throw new Error("FAILED: Real Data Pill not found or missing required text!");
+    }
+
+    // Capture screenshot of Dashboard in White Theme
     await cdp.screenshot(path.join(ARTIFACT_DIR, "screenshot-dashboard-white.png"));
 
-    // 7. Click Sun/Moon Toggle button in Header to switch to Black Theme
+    // 7. Navigate to Ads Analysis in White Theme
+    console.log("Navigating to http://localhost:3000/ads-analysis in White Theme...");
+    await cdp.send("Page.navigate", { url: "http://localhost:3000/ads-analysis" });
+    await sleep(2000);
+    await cdp.screenshot(path.join(ARTIFACT_DIR, "screenshot-ads-white.png"));
+
+    // 8. Navigate to AI Agent in White Theme
+    console.log("Navigating to http://localhost:3000/ai-agent in White Theme...");
+    await cdp.send("Page.navigate", { url: "http://localhost:3000/ai-agent" });
+    await sleep(2000);
+    await cdp.screenshot(path.join(ARTIFACT_DIR, "screenshot-ai-white.png"));
+
+    // 9. Navigate back to Dashboard and Click Header theme toggle to switch to Black Theme
+    console.log("Navigating back to http://localhost:3000/dashboard...");
+    await cdp.send("Page.navigate", { url: "http://localhost:3000/dashboard" });
+    await sleep(2000);
+
     console.log("Clicking Header theme toggle to switch back to Black Theme...");
     await cdp.evaluate(`
       const toggleBtn = document.querySelector('header button[title*=\"Black Theme\"], header button[title*=\"Mode\"]');
@@ -225,7 +271,24 @@ async function main() {
     console.log("Theme after header toggle back to Black Theme:", blackTheme);
     await cdp.screenshot(path.join(ARTIFACT_DIR, "screenshot-dashboard-black.png"));
 
-    // 8. Error check
+    // Verify Real Data Pill in Black Theme
+    const blackPillMetrics = await cdp.evaluate(`
+      (() => {
+        const pill = document.querySelector('.real-data-pill');
+        if (!pill) return { found: false };
+        const style = window.getComputedStyle(pill);
+        return {
+          found: true,
+          text: pill.innerText.trim(),
+          color: style.color,
+          backgroundColor: style.backgroundColor,
+          borderColor: style.borderColor
+        };
+      })()
+    `);
+    console.log("Real Data Pill computed metrics in Black Theme:", blackPillMetrics);
+
+    // 10. Error check
     if (cdp.errors.length > 0) {
       console.error("Browser errors encountered:", cdp.errors);
       throw new Error("Browser console had errors during theme switching");

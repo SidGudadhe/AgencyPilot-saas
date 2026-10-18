@@ -175,13 +175,13 @@ Try asking one of the quick questions below or enter a custom prompt.`,
                 className={`max-w-2xl rounded-xl p-3.5 text-xs leading-relaxed ${
                   isUser
                     ? "bg-brand-600 text-white shadow-sm"
-                    : "bg-slate-950/80 text-slate-200 border border-slate-800"
+                    : "bg-slate-950/80 text-slate-200 border border-slate-800 ai-assistant-bubble"
                 }`}
               >
                 <div className="whitespace-pre-wrap font-sans">{m.content}</div>
 
                 {m.evidence && (
-                  <div className="mt-2.5 rounded bg-slate-900/90 p-2 text-[11px] font-mono border border-slate-800 text-slate-400">
+                  <div className="mt-2.5 rounded bg-slate-900/90 p-2 text-[11px] font-mono border border-slate-800 text-slate-400 ai-evidence-box">
                     <span className="text-[10px] font-bold text-slate-500 block uppercase">
                       Ground Truth Evidence:
                     </span>
@@ -213,7 +213,7 @@ Try asking one of the quick questions below or enter a custom prompt.`,
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-brand-400 border border-brand-500/30">
               <Bot className="h-4 w-4 animate-spin" />
             </div>
-            <div className="rounded-xl bg-slate-950/80 p-3 border border-slate-800 text-xs text-slate-400 italic flex items-center space-x-2">
+            <div className="rounded-xl bg-slate-950/80 p-3 border border-slate-800 text-xs text-slate-400 italic flex items-center space-x-2 ai-assistant-bubble">
               <Sparkles className="h-3.5 w-3.5 animate-pulse text-brand-400" />
               <span>Analyzing workspace metrics and anomaly rules...</span>
             </div>

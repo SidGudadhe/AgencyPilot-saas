@@ -13,6 +13,19 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
+/* Real Data Assurance Pill (Black Theme default) */
+.real-data-pill {
+  color: #34d399;
+  background-color: rgba(2, 44, 34, 0.4);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+/* Select option defaults for dark theme */
+select option {
+  background-color: #0b1120;
+  color: #f1f5f9;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
@@ -69,15 +82,13 @@ body {
   border-color: #e2e8f0 !important;
 }
 
-/* Cards & Panels */
+/* Cards & Main Panels */
 [data-theme="light"] .bg-slate-900,
 [data-theme="light"] .bg-slate-900\/50,
 [data-theme="light"] .bg-slate-900\/60,
 [data-theme="light"] .bg-slate-900\/70,
 [data-theme="light"] .bg-slate-900\/80,
-[data-theme="light"] .bg-slate-900\/90,
-[data-theme="light"] .bg-slate-950,
-[data-theme="light"] .bg-slate-950\/40 {
+[data-theme="light"] .bg-slate-900\/90 {
   background-color: #ffffff !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
 }
@@ -89,6 +100,17 @@ body {
   background-color: #f1f5f9 !important;
 }
 
+/* Sub-panels, Code boxes & Inner Card Sections */
+[data-theme="light"] .bg-slate-950,
+[data-theme="light"] .bg-slate-950\/90,
+[data-theme="light"] .bg-slate-950\/70,
+[data-theme="light"] .bg-slate-950\/60,
+[data-theme="light"] .bg-slate-950\/50,
+[data-theme="light"] .bg-slate-950\/40 {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
 /* Borders */
 [data-theme="light"] .border-slate-800,
 [data-theme="light"] .border-slate-800\/80,
@@ -97,11 +119,13 @@ body {
   border-color: #e2e8f0 !important;
 }
 
-[data-theme="light"] .border-slate-700 {
+[data-theme="light"] .border-slate-700,
+[data-theme="light"] .border-slate-700\/60,
+[data-theme="light"] .border-slate-700\/40 {
   border-color: #cbd5e1 !important;
 }
 
-/* Text Colors */
+/* General Text Colors */
 [data-theme="light"] .text-white {
   color: #0f172a !important;
 }
@@ -126,6 +150,152 @@ body {
   color: #64748b !important;
 }
 
+/* Preserve crisp white text on colored solid buttons & logos in Light Mode */
+[data-theme="light"] button.bg-brand-600,
+[data-theme="light"] .bg-brand-600,
+[data-theme="light"] .bg-brand-700,
+[data-theme="light"] button.bg-red-600,
+[data-theme="light"] .bg-red-600,
+[data-theme="light"] .bg-red-700,
+[data-theme="light"] .bg-brand-500,
+[data-theme="light"] .bg-gradient-to-br {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] button.bg-brand-600 *,
+[data-theme="light"] .bg-brand-600 *,
+[data-theme="light"] button.bg-red-600 *,
+[data-theme="light"] .bg-red-600 *,
+[data-theme="light"] .bg-brand-500 *,
+[data-theme="light"] .bg-gradient-to-br * {
+  color: #ffffff !important;
+}
+
+/* Real Data Assurance Pill (White Theme) */
+[data-theme="light"] .real-data-pill,
+.theme-light .real-data-pill {
+  color: #065f46 !important;
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+  font-weight: 600;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Badges in Light Mode */
+[data-theme="light"] .bg-brand-600\/20,
+[data-theme="light"] .bg-brand-600\/15 {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+[data-theme="light"] .bg-emerald-950\/40,
+[data-theme="light"] .bg-emerald-950\/30 {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+  border-color: #a7f3d0 !important;
+}
+
+[data-theme="light"] .bg-amber-950\/40,
+[data-theme="light"] .bg-amber-950\/30 {
+  background-color: #fffbeb !important;
+  color: #92400e !important;
+  border-color: #fde68a !important;
+}
+
+[data-theme="light"] .bg-red-950\/40,
+[data-theme="light"] .bg-red-950\/30 {
+  background-color: #fef2f2 !important;
+  color: #991b1b !important;
+  border-color: #fecaca !important;
+}
+
+[data-theme="light"] .bg-brand-950\/20 {
+  background-color: #eff6ff !important;
+  border-color: #93c5fd !important;
+}
+
+[data-theme="light"] .bg-emerald-500\/10 {
+  background-color: #ecfdf5 !important;
+  color: #065f46 !important;
+  border-color: #a7f3d0 !important;
+}
+
+/* Semantic text contrast in Light Mode */
+[data-theme="light"] .text-emerald-400 {
+  color: #047857 !important;
+}
+
+[data-theme="light"] .text-red-400 {
+  color: #b91c1c !important;
+}
+
+[data-theme="light"] .text-amber-400 {
+  color: #b45309 !important;
+}
+
+[data-theme="light"] .text-amber-200 {
+  color: #78350f !important;
+}
+
+[data-theme="light"] .text-brand-400 {
+  color: #1d4ed8 !important;
+}
+
+[data-theme="light"] .bg-brand-500\/10 {
+  background-color: #eff6ff !important;
+}
+
+[data-theme="light"] .border-brand-500\/20,
+[data-theme="light"] .border-brand-500\/30 {
+  border-color: #bfdbfe !important;
+}
+
+/* AI Chat in Light Mode */
+[data-theme="light"] .ai-assistant-bubble {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .ai-assistant-bubble * {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .ai-evidence-box {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] .ai-evidence-box * {
+  color: #334155 !important;
+}
+
+[data-theme="light"] button.rounded-full.bg-slate-900 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+[data-theme="light"] button.rounded-full.bg-slate-900:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Tables in Light Mode */
+[data-theme="light"] thead {
+  background-color: #f1f5f9 !important;
+}
+
+[data-theme="light"] th {
+  color: #475569 !important;
+}
+
+[data-theme="light"] tr:hover {
+  background-color: #f8fafc !important;
+}
+
 /* Hover States */
 [data-theme="light"] .hover\:bg-slate-800\/60:hover,
 [data-theme="light"] .hover\:bg-slate-800:hover,
@@ -138,13 +308,18 @@ body {
   color: #0f172a !important;
 }
 
-/* Form Inputs */
+/* Form Inputs & Selects */
 [data-theme="light"] input,
 [data-theme="light"] select,
 [data-theme="light"] textarea {
   background-color: #ffffff !important;
   color: #0f172a !important;
   border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 [data-theme="light"] input::placeholder,
