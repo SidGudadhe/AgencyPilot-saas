@@ -2,7 +2,7 @@
   {
     "id": "usr_admin_default",
     "email": "admin@agencypilot.io",
-    "name": "Sid plotform ads",
+    "name": "Sids AgencyPilot",
     "passwordHash": "$2a$10$wrV3YRyYVpw8KYIFJjFmfeyKqen.hFzXSG5HozhgHs5MnsbJA6pnK",
     "createdAt": "2026-10-17T17:01:13.277Z",
     "workspace": {
@@ -163,6 +163,34 @@
       "id": "ws_adjc6fx8",
       "name": "Test Workspace",
       "slug": "test-workspace-reb2",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_kchzmy4r",
+    "email": "profile_test_1792344490661@agencypilot.io",
+    "name": "Sid plotform ads",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T17:28:10.665Z",
+    "workspace": {
+      "id": "ws_fxx14eai",
+      "name": "Test Workspace",
+      "slug": "test-workspace-x5wr",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_z0h29eu5",
+    "email": "profile_test_1792344851381@agencypilot.io",
+    "name": "Sid plotform ads",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T17:34:11.385Z",
+    "workspace": {
+      "id": "ws_4knuk2e7",
+      "name": "Test Workspace",
+      "slug": "test-workspace-1aja",
       "role": "OWNER",
       "theme": "dark"
     }

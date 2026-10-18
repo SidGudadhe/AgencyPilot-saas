@@ -1,11 +1,170 @@
 import { AdProvider } from "@prisma/client";
 
 /**
- * Canonical Internal Advertising Data Model
- * 
- * Standardizes ad accounts, campaigns, ad sets/groups, ads, and daily time-series
- * metrics across all external ad networks (Meta, Google, JioAds, etc.)
+ * All supported advertising provider keys in the SaaS directory.
  */
+export type ProviderKey =
+  | "META"
+  | "GOOGLE_ADS"
+  | "LINKEDIN"
+  | "AMAZON_ADS"
+  | "MICROSOFT_ADS"
+  | "SNAPCHAT"
+  | "PINTEREST"
+  | "X_ADS"
+  | "REDDIT"
+  | "FLIPKART_ADS"
+  | "JIOADS"
+  | "SHARECHAT"
+  | "INMOBI";
+
+export type ProviderCategory =
+  | "SOCIAL"
+  | "SEARCH"
+  | "RETAIL_MARKETPLACE"
+  | "MOBILE_NETWORKS";
+
+export type IntegrationReadiness =
+  | "AVAILABLE"
+  | "REQUIRES_SETUP"
+  | "REQUIRES_APPROVAL"
+  | "PARTNER_ACCESS_REQUIRED"
+  | "COMING_SOON"
+  | "UNAVAILABLE";
+
+export type ConnectionStatus =
+  | "PENDING_AUTHORIZATION"
+  | "AUTHORIZATION_FAILED"
+  | "VALIDATING"
+  | "CONNECTED"
+  | "CONNECTED_WITH_LIMITATIONS"
+  | "TOKEN_EXPIRED"
+  | "PERMISSION_REQUIRED"
+  | "ACCOUNT_ACCESS_DENIED"
+  | "API_CONFIGURATION_REQUIRED"
+  | "RATE_LIMITED"
+  | "PROVIDER_UNAVAILABLE"
+  | "SYNC_ERROR"
+  | "PAUSED"
+  | "DISCONNECTED";
+
+export type AccessType = "READ_ONLY" | "MODIFICATION";
+
+export interface PermissionDefinition {
+  scope: string;
+  name: string;
+  description: string;
+  purpose: string;
+  required: boolean;
+  accessType: AccessType;
+  selectable: boolean;
+  featureDependencies: string[];
+}
+
+export interface RequiredCredentialInfo {
+  key: string;
+  label: string;
+  envVar: string;
+  description: string;
+  configured: boolean;
+}
+
+export interface ProviderMetadata {
+  key: ProviderKey;
+  displayName: string;
+  category: ProviderCategory;
+  logo: string;
+  supportedProducts: string[];
+  documentationUrl: string;
+  developerPortalUrl: string;
+  authorizationMethod: "OAUTH2_PKCE" | "OAUTH2_CODE" | "API_KEY" | "PARTNER_PORTAL";
+  permissions: PermissionDefinition[];
+  requiredCredentials: RequiredCredentialInfo[];
+  readiness: IntegrationReadiness;
+  readinessReason: string;
+  accountDiscoverySupported: boolean;
+  reportingSupported: boolean;
+  supportedMetrics: string[];
+  knownLimitations: string[];
+  currentVersion: string;
+  lastVerifiedAt: string;
+}
+
+export interface DiscoveredAdAccount {
+  externalId: string;
+  name: string;
+  currency: string;
+  timezone?: string;
+  status?: string;
+  alreadyConnected: boolean;
+  connectedWorkspaceName?: string;
+  reportingAvailable: boolean;
+}
+
+export interface ConnectionValidationResult {
+  valid: boolean;
+  status: ConnectionStatus;
+  provider: ProviderKey;
+  externalAccountId?: string;
+  accountName?: string;
+  grantedScopes: string[];
+  checksPerformed: {
+    name: string;
+    passed: boolean;
+    details?: string;
+  }[];
+  timestamp: string;
+  requestId?: string;
+  errorCategory?: string;
+  guidance?: string;
+  latencyMs?: number;
+}
+
+export interface ConnectedAccountRecord {
+  id: string;
+  workspaceId: string;
+  provider: ProviderKey;
+  externalAccountId: string;
+  accountName: string;
+  currency: string;
+  timezone: string;
+  status: ConnectionStatus;
+  grantedScopes: string[];
+  encryptedAccessToken: string;
+  encryptedRefreshToken?: string;
+  tokenExpiresAt?: string;
+  connectedAt: string;
+  lastValidatedAt: string;
+  lastSuccessfulSyncAt?: string;
+  syncPausedAt?: string;
+  lastErrorCategory?: string;
+  lastErrorMessage?: string;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConnectionSummary {
+  totalConnectedAccounts: number;
+  activeConnections: number;
+  attentionRequired: number;
+  availableProviders: number;
+  totalProvidersInDirectory: number;
+}
+
+export interface OAuthStatePayload {
+  state: string;
+  provider: ProviderKey;
+  workspaceId: string;
+  userId: string;
+  codeVerifier?: string;
+  requestedScopes: string[];
+  redirectUri: string;
+  createdAt: number;
+  expiresAt: number;
+}
+
+// ─── Existing Canonical Models (Preserved for Analytics & Sync) ───────────────
 
 export interface CanonicalAdAccount {
   externalId: string;
@@ -72,47 +231,19 @@ export interface CanonicalDailyMetric {
   rawProviderData?: Record<string, unknown>;
 }
 
-/**
- * Provider Adapter Interface
- * 
- * Every future ad network integration (Meta, Google Ads, JioAds, etc.)
- * implements this standard interface.
- */
 export interface AdProviderAdapter {
   provider: AdProvider;
 
-  /**
-   * Validate token or refresh expired credentials
-   */
   validateAuth(encryptedAccessToken: string, encryptedRefreshToken?: string): Promise<{
     valid: boolean;
     expiresAt?: Date;
     refreshedToken?: string;
   }>;
 
-  /**
-   * Fetch accessible ad accounts for authenticated user/business
-   */
   fetchAccounts(token: string): Promise<CanonicalAdAccount[]>;
-
-  /**
-   * Fetch all campaigns for a specific account
-   */
   fetchCampaigns(token: string, accountExternalId: string): Promise<CanonicalCampaign[]>;
-
-  /**
-   * Fetch all ad groups / ad sets for a campaign
-   */
   fetchAdGroups(token: string, campaignExternalId: string): Promise<CanonicalAdGroup[]>;
-
-  /**
-   * Fetch all ads under an ad group
-   */
   fetchAds(token: string, adGroupExternalId: string): Promise<CanonicalAd[]>;
-
-  /**
-   * Fetch time-series performance metrics for a date range
-   */
   fetchMetrics(
     token: string,
     adExternalId: string,

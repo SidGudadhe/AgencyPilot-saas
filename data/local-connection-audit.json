@@ -1,0 +1,14 @@
+[
+  {
+    "id": "aud_yfel60fw3",
+    "workspaceId": "ws_test_prov_1_1792344851891",
+    "actorUserId": "usr_admin",
+    "action": "AD_ACCOUNT_DISCONNECTED",
+    "safeMetadata": {
+      "provider": "META",
+      "externalAccountId": "act_99887766",
+      "accountName": "Client A Meta Ads"
+    },
+    "createdAt": "2026-10-18T17:34:12.124Z"
+  }
+]

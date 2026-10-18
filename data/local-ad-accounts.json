@@ -1,0 +1,74 @@
+[
+  {
+    "id": "acc_66yp3n14v",
+    "workspaceId": "ws_test_prov_2_1792344492259",
+    "provider": "META",
+    "externalAccountId": "act_summary_1",
+    "accountName": "Summary Meta 1",
+    "currency": "INR",
+    "timezone": "Asia/Kolkata",
+    "status": "CONNECTED",
+    "grantedScopes": [
+      "ads_read"
+    ],
+    "encryptedAccessToken": "258299d44964da651b77e04d:59d5d42b1c62ca09822d9d61864c590d:a3ae71779595a5b0ff86c6",
+    "connectedAt": "2026-10-18T17:28:27.481Z",
+    "lastValidatedAt": "2026-10-18T17:28:27.481Z",
+    "metadata": {
+      "grantedScopes": [
+        "ads_read"
+      ],
+      "lastValidatedAt": "2026-10-18T17:28:27.481Z"
+    },
+    "createdAt": "2026-10-18T17:28:27.481Z",
+    "updatedAt": "2026-10-18T17:28:27.481Z"
+  },
+  {
+    "id": "acc_tnynp9hko",
+    "workspaceId": "ws_test_prov_2_1792344851891",
+    "provider": "META",
+    "externalAccountId": "act_summary_1",
+    "accountName": "Summary Meta 1",
+    "currency": "INR",
+    "timezone": "Asia/Kolkata",
+    "status": "CONNECTED",
+    "grantedScopes": [
+      "ads_read"
+    ],
+    "encryptedAccessToken": "4a53060babd05b0683329329:75dc56f9f01bf675ecc34675dd419dfc:1af4fb87f9e2432ebfd9b2",
+    "connectedAt": "2026-10-18T17:34:12.130Z",
+    "lastValidatedAt": "2026-10-18T17:34:12.130Z",
+    "metadata": {
+      "grantedScopes": [
+        "ads_read"
+      ],
+      "lastValidatedAt": "2026-10-18T17:34:12.130Z"
+    },
+    "createdAt": "2026-10-18T17:34:12.130Z",
+    "updatedAt": "2026-10-18T17:34:12.130Z"
+  },
+  {
+    "id": "acc_kvj7vli28",
+    "workspaceId": "ws_test_prov_2_1792344851891",
+    "provider": "GOOGLE_ADS",
+    "externalAccountId": "1122334455",
+    "accountName": "Summary Google 2",
+    "currency": "USD",
+    "timezone": "Asia/Kolkata",
+    "status": "PERMISSION_REQUIRED",
+    "grantedScopes": [
+      "https://www.googleapis.com/auth/adwords"
+    ],
+    "encryptedAccessToken": "7eb32d595f4637c9335f8008:badc05dd49169525f8b130d7cefc1b44:1267ca9830fe4412b94e4d",
+    "connectedAt": "2026-10-18T17:34:12.134Z",
+    "lastValidatedAt": "2026-10-18T17:34:12.134Z",
+    "metadata": {
+      "grantedScopes": [
+        "https://www.googleapis.com/auth/adwords"
+      ],
+      "lastValidatedAt": "2026-10-18T17:34:12.134Z"
+    },
+    "createdAt": "2026-10-18T17:34:12.134Z",
+    "updatedAt": "2026-10-18T17:34:12.134Z"
+  }
+]
