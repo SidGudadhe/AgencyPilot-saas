@@ -156,3 +156,62 @@ export function saveLocalUser(userData: {
 
   return newRecord;
 }
+
+export function updateLocalUserProfile(
+  userIdOrEmail: string,
+  name: string
+): LocalUserRecord | null {
+  const users = getLocalUsers();
+  const normalized = userIdOrEmail.toLowerCase().trim();
+
+  const user = users.find(
+    (u) => u.id === userIdOrEmail || u.email.toLowerCase().trim() === normalized
+  );
+
+  if (!user) {
+    return null;
+  }
+
+  user.name = name.trim();
+
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf8");
+  } catch (err) {
+    console.error("Failed persisting updated user profile locally:", err);
+  }
+
+  return user;
+}
+
+export function updateLocalUserPassword(
+  userIdOrEmail: string,
+  newPasswordHash: string
+): boolean {
+  const users = getLocalUsers();
+  const normalized = userIdOrEmail.toLowerCase().trim();
+
+  const user = users.find(
+    (u) => u.id === userIdOrEmail || u.email.toLowerCase().trim() === normalized
+  );
+
+  if (!user) {
+    return false;
+  }
+
+  user.passwordHash = newPasswordHash;
+
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), "utf8");
+    return true;
+  } catch (err) {
+    console.error("Failed persisting updated user password locally:", err);
+    return false;
+  }
+}
+

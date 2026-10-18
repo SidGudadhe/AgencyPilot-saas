@@ -4,8 +4,8 @@ import React from "react";
 import { AnomalyReport } from "@/lib/analytics/anomaly-detector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, ShieldAlert, ArrowRight, EyeOff } from "lucide-react";
-import { formatCurrency, formatNumber, formatPercent } from "@/lib/utils";
+import { AlertTriangle, ShieldCheck, ArrowRight, Activity, HelpCircle } from "lucide-react";
+import { formatCurrency, formatPercent } from "@/lib/utils";
 
 interface NeedsAttentionProps {
   anomalies: AnomalyReport[];
@@ -20,31 +20,37 @@ export function NeedsAttention({
 }: NeedsAttentionProps) {
   if (anomalies.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-5 text-center">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-950/40 text-emerald-400 mx-auto mb-2 border border-emerald-500/30">
-          <ShieldAlert className="h-5 w-5" />
+      <div className="rounded-xl border border-border bg-card/60 p-6 text-center backdrop-blur-sm">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 mx-auto mb-3 border border-emerald-500/20">
+          <ShieldCheck className="h-6 w-6" />
         </div>
-        <h3 className="text-sm font-semibold text-white">No Critical Issues Detected</h3>
-        <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
-          All active ads with sufficient sample size are delivering within expected performance parameters.
+        <h3 className="text-sm font-semibold text-foreground">Zero Critical Issues Detected</h3>
+        <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
+          All active advertising creatives with adequate maturity are delivering within expected statistical confidence bands. No anomalous spend waste or broken destinations detected.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center space-x-2">
-        <AlertTriangle className="h-4 w-4 text-amber-400" />
-        <h2 className="text-sm font-semibold text-white tracking-tight">
-          Needs Attention ({anomalies.length} Flagged)
-        </h2>
-        <span className="text-[11px] text-slate-400">
-          Evidence-based performance anomalies requiring review
-        </span>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20">
+            <AlertTriangle className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-foreground tracking-tight">
+              Needs Attention ({anomalies.length} Verified {anomalies.length === 1 ? "Issue" : "Issues"})
+            </h2>
+            <p className="text-[11px] text-muted-foreground">
+              Evidence-based anomalies separated from normal market variance
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3.5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {anomalies.map((item) => {
           const isCritical = item.severity === "CRITICAL";
           const isHigh = item.severity === "HIGH";
@@ -52,11 +58,11 @@ export function NeedsAttention({
           return (
             <div
               key={item.id}
-              className="flex flex-col justify-between rounded-lg border border-slate-800 bg-slate-900/80 p-4 shadow-sm backdrop-blur-sm"
+              className="flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:border-border/80"
             >
-              <div>
-                {/* Header with Severity and Provider */}
-                <div className="flex items-center justify-between pb-2">
+              <div className="space-y-3">
+                {/* Header with Severity, Provider, and Confidence */}
+                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Badge
                       variant={
@@ -66,56 +72,65 @@ export function NeedsAttention({
                           ? "warning"
                           : "secondary"
                       }
-                      className="text-[10px] uppercase font-mono"
+                      className="text-[10px] uppercase font-mono tracking-wider font-semibold"
                     >
                       {item.severity}
                     </Badge>
-                    <span className="text-xs font-semibold text-slate-200">
+                    <span className="text-xs font-semibold text-foreground">
                       {item.provider}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-400">
-                    Confidence: {item.confidence}
-                  </span>
+                  <div className="flex items-center space-x-1.5 text-[11px] font-mono text-muted-foreground">
+                    <Activity className="h-3 w-3 text-brand-500" />
+                    <span>Confidence: {item.confidence}</span>
+                  </div>
                 </div>
 
                 {/* Ad & Campaign Name */}
-                <h3 className="text-sm font-bold text-white tracking-tight">
-                  {item.adName}
-                </h3>
-                <p className="text-[11px] text-slate-400 mb-2 truncate">
-                  Campaign: {item.campaignName}
-                </p>
-
-                {/* Specific Problem */}
-                <div className="rounded-md bg-slate-950/70 p-2.5 border border-slate-800/80 text-xs space-y-1">
-                  <p className="font-semibold text-red-400">
-                    Issue: {item.problemDetected}
-                  </p>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    {item.whyItMatters}
+                <div>
+                  <h3 className="text-sm font-bold text-foreground tracking-tight">
+                    {item.adName}
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    Campaign: {item.campaignName}
                   </p>
                 </div>
 
+                {/* Verification & Cause */}
+                <div className="rounded-lg bg-muted/40 p-3 border border-border/60 text-xs space-y-1.5">
+                  <div className="flex items-start space-x-1.5">
+                    <span className="font-semibold text-destructive shrink-0">Verification:</span>
+                    <span className="text-foreground text-[11px] leading-relaxed">
+                      {item.problemDetected}
+                    </span>
+                  </div>
+                  {item.whyItMatters && (
+                    <div className="flex items-start space-x-1.5 text-muted-foreground text-[11px]">
+                      <HelpCircle className="h-3 w-3 mt-0.5 shrink-0 text-muted-foreground" />
+                      <span>{item.whyItMatters}</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Supporting Metrics */}
-                <div className="mt-3 grid grid-cols-3 gap-2 border-t border-slate-800/60 pt-2.5 text-xs font-mono">
+                <div className="grid grid-cols-3 gap-2 border-t border-border/60 pt-3 text-xs font-mono">
                   <div>
-                    <span className="text-[10px] text-slate-400 block">Spend</span>
-                    <span className="font-semibold text-slate-200">
+                    <span className="text-[10px] text-muted-foreground block">Spend</span>
+                    <span className="font-semibold text-foreground">
                       {formatCurrency(item.supportingMetrics.spend, currency)}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block">Conversions</span>
-                    <span className="font-semibold text-slate-200">
+                    <span className="text-[10px] text-muted-foreground block">Conversions</span>
+                    <span className="font-semibold text-foreground">
                       {item.supportingMetrics.conversions}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-400 block">
+                    <span className="text-[10px] text-muted-foreground block">
                       {item.supportingMetrics.cpa !== undefined ? "CPA" : "CTR"}
                     </span>
-                    <span className="font-semibold text-slate-200">
+                    <span className="font-semibold text-foreground">
                       {item.supportingMetrics.cpa !== undefined && item.supportingMetrics.cpa !== null
                         ? formatCurrency(item.supportingMetrics.cpa, currency)
                         : item.supportingMetrics.ctr !== undefined
@@ -125,28 +140,28 @@ export function NeedsAttention({
                   </div>
                 </div>
 
-                {/* Recommended Corrective Action */}
-                <div className="mt-2.5 text-xs">
-                  <span className="font-semibold text-brand-400">Action: </span>
-                  <span className="text-slate-300 text-[11px]">
+                {/* Recommended Action */}
+                <div className="rounded-lg bg-brand-500/10 border border-brand-500/20 p-2.5 text-xs">
+                  <span className="font-semibold text-brand-600 dark:text-brand-400">Recommended Action: </span>
+                  <span className="text-foreground text-[11px]">
                     {item.recommendedAction}
                   </span>
                 </div>
               </div>
 
               {/* Footer CTA */}
-              <div className="mt-3.5 pt-2 border-t border-slate-800/60 flex items-center justify-between">
-                <span className="text-[10px] text-slate-400 italic">
-                  {item.dataLimitations}
+              <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between">
+                <span className="text-[10px] text-muted-foreground italic">
+                  Deterministic mathematical verification
                 </span>
                 {onSelectAd && (
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => onSelectAd(item.adId)}
-                    className="h-7 text-xs text-brand-400 hover:text-white"
+                    className="h-7 text-xs text-brand-600 dark:text-brand-400 hover:text-foreground"
                   >
-                    <span>View Diagnostics</span>
+                    <span>Inspect Diagnostics</span>
                     <ArrowRight className="ml-1 h-3 w-3" />
                   </Button>
                 )}

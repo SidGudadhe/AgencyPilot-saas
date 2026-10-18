@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { UserCheck } from "lucide-react";
 
 interface ProfileFormProps {
   initialName?: string | null;
@@ -15,19 +18,35 @@ export function ProfileForm({ initialName, email }: ProfileFormProps) {
   const [name, setName] = useState(initialName || "");
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
+  const { update } = useSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name.trim()) {
+      toast.error("Please enter a valid name");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const res = await fetch("/api/settings/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: name.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update profile");
+
       toast.success("Profile updated successfully");
+
+      // Update client session name and trigger server component refresh
+      try {
+        await update({ name: data.user?.name || name.trim() });
+      } catch {
+        // Session update is best effort
+      }
+      router.refresh();
     } catch (err) {
       toast.error((err as Error).message);
     } finally {
@@ -36,10 +55,13 @@ export function ProfileForm({ initialName, email }: ProfileFormProps) {
   };
 
   return (
-    <Card className="border-slate-800 bg-slate-900/60">
+    <Card className="border-border bg-card">
       <CardHeader>
-        <CardTitle className="text-sm font-semibold">User Profile</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <UserCheck className="h-4 w-4 text-brand-500" />
+          <span>User Profile</span>
+        </CardTitle>
+        <CardDescription className="text-xs text-muted-foreground">
           Manage your personal display information across workspaces
         </CardDescription>
       </CardHeader>
@@ -57,7 +79,7 @@ export function ProfileForm({ initialName, email }: ProfileFormProps) {
             label="Login Email (Read-only)"
             value={email || ""}
             disabled
-            className="opacity-70 bg-slate-950 font-mono text-xs"
+            className="opacity-70 bg-muted/50 font-mono text-xs cursor-not-allowed"
           />
 
           <Button type="submit" size="sm" isLoading={isSaving}>

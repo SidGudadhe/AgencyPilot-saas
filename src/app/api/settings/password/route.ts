@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions, verifyPassword, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { findLocalUserById, findLocalUserByEmail, updateLocalUserPassword } from "@/lib/local-store";
 import { z } from "zod";
 
 const passwordSchema = z.object({
@@ -12,9 +13,12 @@ const passwordSchema = z.object({
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!session?.user?.id) {
+  if (!session?.user?.id && !session?.user?.email) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = session.user.id;
+  const userEmail = session.user.email;
 
   try {
     const body = await req.json();
@@ -27,18 +31,43 @@ export async function POST(req: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-    });
+    // 1. Try Prisma DB user
+    let userPasswordHash: string | null = null;
+    let isPrismaUser = false;
 
-    if (!user || !user.passwordHash) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    try {
+      const user = userId
+        ? await prisma.user.findUnique({ where: { id: userId } })
+        : (userEmail ? await prisma.user.findUnique({ where: { email: userEmail } }) : null);
+
+      if (user && user.passwordHash) {
+        userPasswordHash = user.passwordHash;
+        isPrismaUser = true;
+      }
+    } catch (dbErr) {
+      console.warn("Prisma user lookup failed during password change:", (dbErr as Error).message);
+    }
+
+    // 2. Try local store if not found in Prisma
+    let localUser = null;
+    if (!userPasswordHash) {
+      localUser = userId ? findLocalUserById(userId) : null;
+      if (!localUser && userEmail) {
+        localUser = findLocalUserByEmail(userEmail);
+      }
+      if (localUser && localUser.passwordHash) {
+        userPasswordHash = localUser.passwordHash;
+      }
+    }
+
+    if (!userPasswordHash) {
+      return NextResponse.json({ error: "User account not found" }, { status: 404 });
     }
 
     // Verify current password
     const isCurrentValid = await verifyPassword(
       result.data.currentPassword,
-      user.passwordHash
+      userPasswordHash
     );
 
     if (!isCurrentValid) {
@@ -51,19 +80,31 @@ export async function POST(req: Request) {
     // Hash and store new password
     const newHash = await hashPassword(result.data.newPassword);
 
-    await prisma.user.update({
-      where: { id: session.user.id },
-      data: { passwordHash: newHash },
-    });
+    if (isPrismaUser && userId) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: newHash },
+      });
 
-    await prisma.auditEvent.create({
-      data: {
-        userId: user.id,
-        action: "PASSWORD_CHANGED",
-        resourceType: "User",
-        resourceId: user.id,
-      },
-    });
+      try {
+        await prisma.auditEvent.create({
+          data: {
+            userId,
+            action: "PASSWORD_CHANGED",
+            resourceType: "User",
+            resourceId: userId,
+          },
+        });
+      } catch (auditErr) {
+        console.warn("Audit event creation skipped:", auditErr);
+      }
+    } else {
+      const identifier = userId || userEmail || "";
+      const updated = updateLocalUserPassword(identifier, newHash);
+      if (!updated) {
+        throw new Error("Failed persisting updated password locally");
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -72,7 +113,7 @@ export async function POST(req: Request) {
   } catch (err) {
     console.error("Password change error:", err);
     return NextResponse.json(
-      { error: "Failed to update password" },
+      { error: "Failed to update password: " + (err as Error).message },
       { status: 500 }
     );
   }

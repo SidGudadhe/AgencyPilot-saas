@@ -10,11 +10,8 @@ import {
   Sparkles,
   ExternalLink,
   ShieldCheck,
-  AlertCircle,
-  Video,
-  MousePointer,
-  DollarSign,
-  TrendingUp,
+  Activity,
+  Layers,
 } from "lucide-react";
 
 interface AdDetailModalProps {
@@ -49,6 +46,10 @@ export function AdDetailModal({
     roas: ad.roas,
   });
 
+  // Maturity classification
+  const isMature = ad.spend >= 2000 && ad.clicks >= 60;
+  const evidenceState = isMature ? "SUFFICIENT_EVIDENCE" : ad.spend > 400 ? "COLLECTING_EVIDENCE" : "INSUFFICIENT_DATA";
+
   return (
     <Modal
       isOpen={isOpen}
@@ -59,9 +60,9 @@ export function AdDetailModal({
     >
       <div className="space-y-6 pt-2">
         {/* 1. Header Overview & Status Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-950 p-3 border border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-muted/40 p-3.5 border border-border">
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-slate-400">Ad Status:</span>
+            <span className="text-xs text-muted-foreground">Status:</span>
             <Badge
               variant={ad.status === "ACTIVE" ? "success" : "secondary"}
               className="font-mono text-xs"
@@ -71,15 +72,22 @@ export function AdDetailModal({
             <Badge variant="outline" className="font-mono text-xs">
               {ad.provider}
             </Badge>
+            <Badge
+              variant={evidenceState === "SUFFICIENT_EVIDENCE" ? "outline" : "secondary"}
+              className="text-[10px] font-mono"
+            >
+              <Layers className="h-3 w-3 mr-1" />
+              {evidenceState}
+            </Badge>
           </div>
           {ad.landingPageUrl && (
             <a
               href={ad.landingPageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center text-xs text-brand-400 hover:text-brand-300 font-mono"
+              className="inline-flex items-center text-xs text-brand-600 dark:text-brand-400 hover:underline font-mono"
             >
-              <span>View Landing Page</span>
+              <span>Verify Landing Page</span>
               <ExternalLink className="ml-1 h-3 w-3" />
             </a>
           )}
@@ -87,68 +95,68 @@ export function AdDetailModal({
 
         {/* 2. Primary 6-Metric Diagnostic Grid */}
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-            Core Performance Metrics
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+            Deterministic Canonical Metrics
           </h4>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <div className="rounded-lg bg-slate-950/70 p-3 border border-slate-800 font-mono">
-              <span className="text-[11px] text-slate-400 block">Total Spend</span>
-              <span className="text-lg font-bold text-white">
+            <div className="rounded-xl bg-card p-3.5 border border-border font-mono shadow-sm">
+              <span className="text-[11px] text-muted-foreground block">Total Spend</span>
+              <span className="text-lg font-bold text-foreground">
                 {formatCurrency(ad.spend, currency)}
               </span>
             </div>
 
-            <div className="rounded-lg bg-slate-950/70 p-3 border border-slate-800 font-mono">
-              <span className="text-[11px] text-slate-400 block">Impressions & Reach</span>
-              <span className="text-lg font-bold text-white">
+            <div className="rounded-xl bg-card p-3.5 border border-border font-mono shadow-sm">
+              <span className="text-[11px] text-muted-foreground block">Impressions & Reach</span>
+              <span className="text-lg font-bold text-foreground">
                 {formatNumber(ad.impressions)}
               </span>
               {ad.reach && (
-                <span className="text-[10px] text-slate-500 block">
+                <span className="text-[10px] text-muted-foreground block">
                   Reach: {formatNumber(ad.reach)}
                 </span>
               )}
             </div>
 
-            <div className="rounded-lg bg-slate-950/70 p-3 border border-slate-800 font-mono">
-              <span className="text-[11px] text-slate-400 block">Clicks & CTR</span>
-              <span className="text-lg font-bold text-white">
+            <div className="rounded-xl bg-card p-3.5 border border-border font-mono shadow-sm">
+              <span className="text-[11px] text-muted-foreground block">Clicks & CTR</span>
+              <span className="text-lg font-bold text-foreground">
                 {formatNumber(ad.clicks)}
               </span>
-              <span className="text-[10px] text-slate-400 block">
+              <span className="text-[10px] text-muted-foreground block">
                 CTR: {formatPercent(ad.ctr)}
               </span>
             </div>
 
-            <div className="rounded-lg bg-slate-950/70 p-3 border border-slate-800 font-mono">
-              <span className="text-[11px] text-slate-400 block">Cost Per Click (CPC)</span>
-              <span className="text-lg font-bold text-white">
+            <div className="rounded-xl bg-card p-3.5 border border-border font-mono shadow-sm">
+              <span className="text-[11px] text-muted-foreground block">Cost Per Click (CPC)</span>
+              <span className="text-lg font-bold text-foreground">
                 {formatCurrency(ad.cpc, currency)}
               </span>
-              <span className="text-[10px] text-slate-500 block">
+              <span className="text-[10px] text-muted-foreground block">
                 CPM: {formatCurrency(ad.cpm, currency)}
               </span>
             </div>
 
-            <div className="rounded-lg bg-slate-950/70 p-3 border border-slate-800 font-mono">
-              <span className="text-[11px] text-slate-400 block">Conversions & CVR</span>
-              <span className="text-lg font-bold text-white">
+            <div className="rounded-xl bg-card p-3.5 border border-border font-mono shadow-sm">
+              <span className="text-[11px] text-muted-foreground block">Conversions & CVR</span>
+              <span className="text-lg font-bold text-foreground">
                 {ad.conversions !== null ? formatNumber(ad.conversions) : "Not tracked"}
               </span>
               {ad.cvr !== null && (
-                <span className="text-[10px] text-slate-400 block">
+                <span className="text-[10px] text-muted-foreground block">
                   CVR: {formatPercent(ad.cvr)}
                 </span>
               )}
             </div>
 
-            <div className="rounded-lg bg-slate-950/70 p-3 border border-slate-800 font-mono">
-              <span className="text-[11px] text-slate-400 block">ROAS</span>
-              <span className="text-lg font-bold text-brand-400">
+            <div className="rounded-xl bg-card p-3.5 border border-border font-mono shadow-sm">
+              <span className="text-[11px] text-muted-foreground block">ROAS & Revenue</span>
+              <span className="text-lg font-bold text-brand-600 dark:text-brand-400">
                 {formatROAS(ad.roas)}
               </span>
               {ad.revenue !== null && (
-                <span className="text-[10px] text-slate-400 block">
+                <span className="text-[10px] text-muted-foreground block">
                   Rev: {formatCurrency(ad.revenue, currency)}
                 </span>
               )}
@@ -159,8 +167,8 @@ export function AdDetailModal({
         {/* 3. Deep Evidence-Based Recommendations */}
         <div>
           <div className="flex items-center space-x-2 mb-2">
-            <Sparkles className="h-4 w-4 text-brand-400" />
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+            <Sparkles className="h-4 w-4 text-brand-500" />
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
               Evidence-Based Recommendations ({recommendations.length})
             </h4>
           </div>
@@ -170,43 +178,44 @@ export function AdDetailModal({
               {recommendations.map((rec) => (
                 <div
                   key={rec.id}
-                  className="rounded-lg border border-slate-800 bg-slate-950/90 p-4 space-y-2"
+                  className="rounded-xl border border-border bg-card p-4 space-y-2.5 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-brand-400">
-                      Recommendation
+                    <span className="text-xs font-bold text-brand-600 dark:text-brand-400">
+                      Recommendation Action
                     </span>
                     <Badge variant="outline" className="text-[10px] font-mono">
+                      <Activity className="h-3 w-3 mr-1 text-brand-500" />
                       Confidence: {rec.confidenceLevel}
                     </Badge>
                   </div>
 
-                  <p className="text-xs font-semibold text-white">
+                  <p className="text-xs font-semibold text-foreground">
                     {rec.detectedIssue}
                   </p>
 
-                  <div className="rounded bg-slate-900 p-2 text-[11px] text-slate-300 font-mono border border-slate-800">
-                    <span className="text-slate-500 block text-[10px]">EVIDENCE:</span>
+                  <div className="rounded-lg bg-muted/50 p-2.5 text-[11px] text-foreground font-mono border border-border">
+                    <span className="text-muted-foreground block text-[10px] font-sans font-semibold">EMPIRICAL EVIDENCE:</span>
                     {rec.supportingEvidence}
                   </div>
 
-                  <p className="text-xs text-slate-200">
-                    <span className="font-semibold text-emerald-400">Action: </span>
+                  <p className="text-xs text-foreground">
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">Action: </span>
                     {rec.recommendedAction}
                   </p>
 
-                  <p className="text-[11px] text-slate-400">
-                    <span className="font-semibold text-slate-300">Rationale: </span>
+                  <p className="text-[11px] text-muted-foreground">
+                    <span className="font-semibold text-foreground">Rationale: </span>
                     {rec.reasonForRecommendation}
                   </p>
 
-                  <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500 pt-1 border-t border-slate-800/80">
+                  <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground pt-2 border-t border-border">
                     <div>
-                      <span className="font-semibold text-slate-400">Risks: </span>
+                      <span className="font-semibold text-foreground">Risks: </span>
                       {rec.potentialRisks}
                     </div>
                     <div>
-                      <span className="font-semibold text-slate-400">Observation: </span>
+                      <span className="font-semibold text-foreground">Observation: </span>
                       {rec.observationPeriod}
                     </div>
                   </div>
@@ -214,10 +223,10 @@ export function AdDetailModal({
               ))}
             </div>
           ) : (
-            <div className="rounded-lg bg-slate-950/60 p-4 text-center border border-slate-800">
-              <ShieldCheck className="h-5 w-5 text-slate-500 mx-auto mb-1" />
-              <p className="text-xs text-slate-400">
-                No corrective actions required. Ad performance is healthy or currently in data accumulation phase.
+            <div className="rounded-xl bg-card p-5 text-center border border-border">
+              <ShieldCheck className="h-5 w-5 text-emerald-500 mx-auto mb-1.5" />
+              <p className="text-xs text-muted-foreground">
+                No corrective actions required. Ad performance is healthy or currently in data accumulation calibration.
               </p>
             </div>
           )}

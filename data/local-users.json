@@ -82,5 +82,19 @@
       "role": "OWNER",
       "theme": "dark"
     }
+  },
+  {
+    "id": "usr_6lc8mzty",
+    "email": "profile_test_1792332266533@agencypilot.io",
+    "name": "Second Update By Email",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T14:04:26.547Z",
+    "workspace": {
+      "id": "ws_3cx2491q",
+      "name": "Test Workspace",
+      "slug": "test-workspace-qws6",
+      "role": "OWNER",
+      "theme": "dark"
+    }
   }
 ]
