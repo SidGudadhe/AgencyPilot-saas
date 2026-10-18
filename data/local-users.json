@@ -96,5 +96,33 @@
       "role": "OWNER",
       "theme": "dark"
     }
+  },
+  {
+    "id": "usr_y9wb31ma",
+    "email": "profile_test_1792332958838@agencypilot.io",
+    "name": "Second Update By Email",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T14:15:58.844Z",
+    "workspace": {
+      "id": "ws_w4zoh0ad",
+      "name": "Test Workspace",
+      "slug": "test-workspace-ry0a",
+      "role": "OWNER",
+      "theme": "dark"
+    }
+  },
+  {
+    "id": "usr_sjj97upm",
+    "email": "profile_test_1792333058020@agencypilot.io",
+    "name": "Second Update By Email",
+    "passwordHash": "new-secure-bcrypt-hash",
+    "createdAt": "2026-10-18T14:17:38.027Z",
+    "workspace": {
+      "id": "ws_nmmxo2y3",
+      "name": "Test Workspace",
+      "slug": "test-workspace-b44c",
+      "role": "OWNER",
+      "theme": "dark"
+    }
   }
 ]

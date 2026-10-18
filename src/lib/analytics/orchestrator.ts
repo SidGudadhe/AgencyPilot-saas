@@ -19,9 +19,14 @@ import {
   AdPerformanceBaseline,
   ConfidenceEvaluation,
   DataQualityReport,
+  DiagnosisEvidenceRecord,
+  EvidenceStatus,
   IntelligenceRecommendation,
+  PerformanceStatus,
   ProbableCauseAnalysis,
+  StandardizedDiagnosisStatus,
   StatisticalAnomalyReport,
+  TechnicalStatus,
   VerifiedIssue,
 } from "./types/intelligence";
 import { DataValidationEngine, RawAdDataInput } from "./engines/data-validation-engine";
@@ -102,6 +107,8 @@ export interface AdIntelligenceResult {
   causeAnalysis?: ProbableCauseAnalysis;
   recommendation: IntelligenceRecommendation | null;
   confidence: ConfidenceEvaluation;
+  triDimensionalStatus: StandardizedDiagnosisStatus;
+  evidenceRecords: DiagnosisEvidenceRecord[];
   generatedAt: string;
 }
 
@@ -126,7 +133,7 @@ export class AdIntelligenceOrchestrator {
     } = request;
 
     // ------------------------------------------------------------------------
-    // Engine 1: Provider Data Validation Engine
+    // Engine 1: Provider Data Validation Engine (Layer A)
     // ------------------------------------------------------------------------
     const validationInput: RawAdDataInput = {
       adId: ad.id,
@@ -151,7 +158,7 @@ export class AdIntelligenceOrchestrator {
     const dataQuality = DataValidationEngine.validate(validationInput);
 
     // ------------------------------------------------------------------------
-    // Engine 2: Canonical Advertising Metrics Engine
+    // Engine 2: Canonical Advertising Metrics Engine (Layer C)
     // ------------------------------------------------------------------------
     const canonicalMetrics = CanonicalMetricsEngine.calculate({
       adId: ad.id,
@@ -169,7 +176,7 @@ export class AdIntelligenceOrchestrator {
     });
 
     // ------------------------------------------------------------------------
-    // Engine 3: Ad Maturity and Evidence Assessment Engine
+    // Engine 3: Ad Maturity and Evidence Assessment Engine (Layer B)
     // ------------------------------------------------------------------------
     const hasTechnicalException = Boolean(
       (technicalSignals?.landingPageHttpStatus && technicalSignals.landingPageHttpStatus >= 400) ||
@@ -191,7 +198,7 @@ export class AdIntelligenceOrchestrator {
     });
 
     // ------------------------------------------------------------------------
-    // Engine 4: Objective-Specific Performance Baseline Engine
+    // Engine 4: Objective-Specific Performance Baseline Engine (Layer D)
     // ------------------------------------------------------------------------
     const baseline = PerformanceBaselineEngine.generateBaseline({
       id: `BASE-${ad.id}`,
@@ -207,7 +214,7 @@ export class AdIntelligenceOrchestrator {
     });
 
     // ------------------------------------------------------------------------
-    // Engine 5: Statistical Anomaly Detection Engine
+    // Engine 5: Statistical Anomaly Detection Engine (Layer E)
     // ------------------------------------------------------------------------
     const anomalies = StatisticalAnomalyEngine.analyze({
       adId: ad.id,
@@ -226,7 +233,7 @@ export class AdIntelligenceOrchestrator {
     });
 
     // ------------------------------------------------------------------------
-    // Engine 6: Verified Issue Detection Engine
+    // Engine 6: Verified Issue Detection Engine (Layer F & G)
     // ------------------------------------------------------------------------
     const issues = IssueDetectionEngine.detectIssues({
       workspaceId,
@@ -251,7 +258,7 @@ export class AdIntelligenceOrchestrator {
     });
 
     // ------------------------------------------------------------------------
-    // Engine 7: Probable Cause Analysis Engine (for primary issue, if any)
+    // Engine 7: Probable Cause Analysis Engine (Layer H)
     // ------------------------------------------------------------------------
     let causeAnalysis: ProbableCauseAnalysis | undefined;
     const primaryIssue = issues[0];
@@ -265,7 +272,7 @@ export class AdIntelligenceOrchestrator {
     }
 
     // ------------------------------------------------------------------------
-    // Engine 8: Recommendation Engine
+    // Engine 8: Recommendation Engine (Master Prompt Section 10)
     // ------------------------------------------------------------------------
     const dailySpend = activeDeliveryDays > 0 ? canonicalMetrics.core.spend / activeDeliveryDays : canonicalMetrics.core.spend;
     const recommendation = RecommendationEngine.generate({
@@ -279,7 +286,7 @@ export class AdIntelligenceOrchestrator {
     });
 
     // ------------------------------------------------------------------------
-    // Engine 9: Confidence and Uncertainty Engine
+    // Engine 9: Confidence and Uncertainty Engine (Master Prompt Section 7)
     // ------------------------------------------------------------------------
     const confidence = ConfidenceUncertaintyEngine.evaluate({
       dataQuality,
@@ -289,6 +296,161 @@ export class AdIntelligenceOrchestrator {
       issue: primaryIssue,
       signalDaysCount: activeDeliveryDays,
       corroboratingSignalsCount: issues.length,
+    });
+
+    // ------------------------------------------------------------------------
+    // Orthogonal 3-Dimensional Status System (Master Prompt Section 5)
+    // ------------------------------------------------------------------------
+    const evidenceStatus: EvidenceStatus = !dataQuality.isValid
+      ? "DATA_QUALITY_ISSUE"
+      : maturity.evidenceState === "INSUFFICIENT_DATA"
+      ? "INSUFFICIENT_EVIDENCE"
+      : maturity.evidenceState === "COLLECTING_EVIDENCE"
+      ? "COLLECTING_EVIDENCE"
+      : "SUFFICIENT_EVIDENCE";
+
+    const hasVerifiedTech = issues.some((i) => i.evidence_state === "VERIFIED_TECHNICAL_ISSUE");
+    const technicalStatus: TechnicalStatus = hasVerifiedTech
+      ? "VERIFIED_TECHNICAL_ISSUE"
+      : technicalSignals
+      ? "NO_VERIFIED_TECHNICAL_ISSUE"
+      : "UNKNOWN";
+
+    let performanceStatus: PerformanceStatus = "HEALTHY_IN_EVALUATED_PERIOD";
+    if (evidenceStatus === "DATA_QUALITY_ISSUE" || evidenceStatus === "INSUFFICIENT_EVIDENCE") {
+      performanceStatus = "INSUFFICIENT_EVIDENCE";
+    } else if (evidenceStatus === "COLLECTING_EVIDENCE") {
+      performanceStatus = "MONITOR";
+    } else {
+      const hasSevereBreach = issues.some(
+        (i) => i.evidence_state === "EVIDENCE_BACKED_PERFORMANCE_ISSUE" && (i.severity === "CRITICAL" || i.severity === "HIGH")
+      );
+      const hasModerateConcern = issues.some(
+        (i) => i.evidence_state === "EVIDENCE_BACKED_PERFORMANCE_ISSUE" && (i.severity === "MEDIUM" || i.severity === "LOW")
+      );
+
+      if (hasSevereBreach) {
+        performanceStatus = "VERIFIED_UNDERPERFORMING";
+      } else if (hasModerateConcern) {
+        performanceStatus = "PERFORMANCE_CONCERN";
+      } else {
+        performanceStatus = "HEALTHY_IN_EVALUATED_PERIOD";
+      }
+    }
+
+    const statusRationale = `Evidence: ${evidenceStatus} • Technical: ${technicalStatus} • Performance: ${performanceStatus}`;
+
+    const triDimensionalStatus: StandardizedDiagnosisStatus = {
+      evidenceStatus,
+      technicalStatus,
+      performanceStatus,
+      statusRationale,
+    };
+
+    // ------------------------------------------------------------------------
+    // Structured Evidence Records for Every Diagnosis (Master Prompt Section 6)
+    // ------------------------------------------------------------------------
+    const durationDays = Math.max(1, activeDeliveryDays);
+    const evidenceRecords: DiagnosisEvidenceRecord[] = issues.map((iss) => {
+      const isTech = iss.evidence_state === "VERIFIED_TECHNICAL_ISSUE";
+      const hasSavings = recommendation?.defensible_impact_range.hasDefensibleRange ?? false;
+
+      return {
+        issueId: iss.issue_id,
+        issueType: iss.issue_type,
+        adId: ad.id,
+        campaignId: campaign.id,
+        providerId: ad.provider,
+        workspaceId,
+        evaluationWindow: {
+          startDate: reportingDateRange.startDate,
+          endDate: reportingDateRange.endDate,
+          durationDays,
+        },
+        dataFreshnessHours: dataQuality.syncStalenessHours,
+        observedMetrics: iss.observed_metrics,
+        applicableBaseline: iss.baseline_metrics,
+        absoluteChange: typeof iss.observed_metrics.relativeDeclinePercent === "number" ? iss.observed_metrics.relativeDeclinePercent : null,
+        relativeChangeRatio: typeof iss.observed_metrics.relativeDeclinePercent === "number" ? Number(iss.observed_metrics.relativeDeclinePercent) / 100 : null,
+        minimumEvidenceRequirements: [
+          {
+            requirement: "Data Integrity & Non-staleness",
+            met: !dataQuality.isStale,
+            observedValue: `${dataQuality.syncStalenessHours.toFixed(1)}h staleness`,
+            requiredThreshold: "< 24h staleness",
+          },
+          {
+            requirement: isTech ? "Direct Technical Confirmation" : "Statistical Sample Adequacy",
+            met: isTech ? true : maturity.maturityScore >= 0.8,
+            observedValue: isTech ? iss.verification_method : `${(maturity.maturityScore * 100).toFixed(0)}% score`,
+            requiredThreshold: isTech ? "Observed HTTP or API failure" : ">= 80% adequacy",
+          },
+        ],
+        statisticalUncertainty: anomalies.ctrAnomaly
+          ? {
+              pValue: anomalies.ctrAnomaly.pValue,
+              confidenceIntervalWilson95: anomalies.ctrAnomaly.confidenceIntervalWilson95,
+              sampleSize: canonicalMetrics.core.impressions,
+              method: "Wilson score 95% binomial interval",
+            }
+          : undefined,
+        businessImpactEstimate: hasSavings
+          ? {
+              status: "ESTIMATED",
+              minEstimatedSaving: recommendation?.defensible_impact_range.minEstimatedSaving,
+              maxEstimatedSaving: recommendation?.defensible_impact_range.maxEstimatedSaving,
+              currency: account.currency,
+              assumptions: recommendation?.confidence_and_assumptions.keyAssumptions || [],
+            }
+          : {
+              status: "NOT_ESTIMABLE",
+              assumptions: [],
+              reasonIfUnestimable: "Ad is either in calibration or lacks historical conversion baseline.",
+            },
+        confirmedFacts: [
+          `Ad Status: ${ad.status}`,
+          `Spend: ${canonicalMetrics.core.spend}`,
+          `Impressions: ${canonicalMetrics.core.impressions}`,
+          `Clicks: ${canonicalMetrics.core.clicks}`,
+          `Verification: ${iss.verification_method}`,
+        ],
+        suspectedCauses: causeAnalysis
+          ? [
+              {
+                hypothesis: causeAnalysis.primaryHypothesis.cause,
+                probability: causeAnalysis.primaryHypothesis.probability,
+                supportingEvidence: causeAnalysis.primaryHypothesis.corroboratingSignals,
+                counterEvidence: [],
+                additionalDataNeeded: causeAnalysis.confoundingFactors,
+                recommendedTest: causeAnalysis.diagnosticNextSteps[0] || "Audit telemetry",
+              },
+              ...causeAnalysis.competingHypotheses.map((ch) => ({
+                hypothesis: ch.cause,
+                probability: ch.probability,
+                supportingEvidence: [],
+                counterEvidence: ch.counterEvidence,
+                additionalDataNeeded: ["Extended multi-day attribution verification"],
+                recommendedTest: causeAnalysis?.diagnosticNextSteps[1] || "A/B test replacement variant",
+              })),
+            ]
+          : [],
+        missingInformationAndLimitations: [iss.limitations, ...dataQuality.unsupportedConclusions],
+        recommendedNextAction: iss.recommended_action,
+        resolutionConditions: {
+          confirmationConditions: ["Issue persists across next 48h scheduled synchronization."],
+          weakeningConditions: ["Observed conversion rate rebounds into 95% baseline interval."],
+          resolvingConditions: [
+            isTech
+              ? "Destination endpoint returns HTTP 200 OK."
+              : "Blended CPA stabilizes within target limit.",
+          ],
+        },
+        calibratedConfidence: {
+          score: iss.confidence_level,
+          tier: iss.confidence_tier,
+          isCalibrated: true,
+        },
+      };
     });
 
     return {
@@ -304,6 +466,8 @@ export class AdIntelligenceOrchestrator {
       causeAnalysis,
       recommendation,
       confidence,
+      triDimensionalStatus,
+      evidenceRecords,
       generatedAt: new Date().toISOString(),
     };
   }

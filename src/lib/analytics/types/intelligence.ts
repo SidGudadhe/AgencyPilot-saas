@@ -405,3 +405,97 @@ export interface BacktestEvaluationMetrics {
   brierCalibrationScore: number; // Calibration of predicted confidence
   passedAcceptanceCriteria: boolean;
 }
+
+// ============================================================================
+// 11. STANDARDIZED RESULT LABELS (3 Orthogonal Dimensions)
+// ============================================================================
+
+export type EvidenceStatus =
+  | "DATA_QUALITY_ISSUE"
+  | "INSUFFICIENT_EVIDENCE"
+  | "COLLECTING_EVIDENCE"
+  | "SUFFICIENT_EVIDENCE";
+
+export type TechnicalStatus =
+  | "VERIFIED_TECHNICAL_ISSUE"
+  | "NO_VERIFIED_TECHNICAL_ISSUE"
+  | "UNKNOWN";
+
+export type PerformanceStatus =
+  | "VERIFIED_UNDERPERFORMING"
+  | "PERFORMANCE_CONCERN"
+  | "HEALTHY_IN_EVALUATED_PERIOD"
+  | "MONITOR"
+  | "INSUFFICIENT_EVIDENCE";
+
+export interface StandardizedDiagnosisStatus {
+  evidenceStatus: EvidenceStatus;
+  technicalStatus: TechnicalStatus;
+  performanceStatus: PerformanceStatus;
+  statusRationale: string;
+}
+
+// ============================================================================
+// 12. STRUCTURED EVIDENCE RECORD FOR EVERY DIAGNOSIS (Section 6)
+// ============================================================================
+
+export interface DiagnosisEvidenceRecord {
+  issueId: string;
+  issueType: VerifiedIssueType | "NO_ISSUE" | "DATA_QUALITY_ANOMALY";
+  adId: string;
+  campaignId: string;
+  providerId: AdProvider;
+  workspaceId: string;
+  evaluationWindow: {
+    startDate: string;
+    endDate: string;
+    durationDays: number;
+  };
+  dataFreshnessHours: number;
+  observedMetrics: Record<string, number | string | null | undefined>;
+  applicableBaseline?: Record<string, number | string | null | undefined>;
+  absoluteChange?: number | null;
+  relativeChangeRatio?: number | null;
+  minimumEvidenceRequirements: {
+    requirement: string;
+    met: boolean;
+    observedValue: number | string;
+    requiredThreshold: number | string;
+  }[];
+  statisticalUncertainty?: {
+    pValue?: number;
+    confidenceIntervalWilson95?: [number, number];
+    sampleSize: number;
+    method: string;
+  };
+  businessImpactEstimate: {
+    status: "ESTIMATED" | "NOT_ESTIMABLE";
+    minEstimatedSaving?: number;
+    maxEstimatedSaving?: number;
+    currency?: string;
+    assumptions: string[];
+    reasonIfUnestimable?: string;
+  };
+  confirmedFacts: string[];
+  suspectedCauses: {
+    hypothesis: string;
+    probability: number;
+    supportingEvidence: string[];
+    counterEvidence: string[];
+    additionalDataNeeded: string[];
+    recommendedTest: string;
+  }[];
+  missingInformationAndLimitations: string[];
+  recommendedNextAction: string;
+  resolutionConditions: {
+    confirmationConditions: string[];
+    weakeningConditions: string[];
+    resolvingConditions: string[];
+  };
+  calibratedConfidence: {
+    score: number;
+    tier: "HIGH" | "MEDIUM" | "LOW";
+    isCalibrated: boolean;
+  };
+}
+
