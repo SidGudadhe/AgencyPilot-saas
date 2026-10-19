@@ -337,4 +337,56 @@ describe("Ad Provider Connections System — Comprehensive Test Suite", () => {
     expect(summary.attentionRequired).toBe(1);
     expect(summary.totalProvidersInDirectory).toBe(13);
   });
+
+  // ─── 7. Sandbox Developer Flow & Account Discovery ────────────────────────
+
+  test("MetaAdsAdapter seamlessly handles sandbox developer codes and discovery", async () => {
+    const adapter = new MetaAdsAdapter();
+    const tokenResult = await adapter.exchangeAuthorizationCode(
+      "sandbox_meta_test_code_123",
+      "http://localhost:3000/api/providers/callback"
+    );
+
+    expect(tokenResult.accessToken).toContain("sandbox_meta_token_");
+    expect(tokenResult.grantedScopes).toContain("ads_read");
+    expect(tokenResult.grantedScopes).toContain("read_insights");
+
+    const accounts = await adapter.discoverAccounts(tokenResult.accessToken);
+    expect(accounts.length).toBeGreaterThanOrEqual(1);
+    expect(accounts[0].externalId).toContain("act_");
+    expect(accounts[0].reportingAvailable).toBe(true);
+
+    const validation = await adapter.validateConnection(
+      tokenResult.accessToken,
+      accounts[0].externalId
+    );
+    expect(validation.valid).toBe(true);
+    expect(validation.status).toBe("CONNECTED");
+    expect(validation.checksPerformed.length).toBe(4);
+  });
+
+  test("GoogleAdsAdapter seamlessly handles sandbox developer codes and discovery", async () => {
+    const adapter = new GoogleAdsAdapter();
+    const tokenResult = await adapter.exchangeAuthorizationCode(
+      "sandbox_google_test_code_456",
+      "http://localhost:3000/api/providers/callback"
+    );
+
+    expect(tokenResult.accessToken).toContain("sandbox_google_token_");
+    expect(tokenResult.refreshToken).toBeDefined();
+    expect(tokenResult.grantedScopes).toContain("https://www.googleapis.com/auth/adwords");
+
+    const accounts = await adapter.discoverAccounts(tokenResult.accessToken);
+    expect(accounts.length).toBeGreaterThanOrEqual(1);
+    expect(accounts[0].externalId).toBe("839-201-9482");
+    expect(accounts[0].status).toBe("ACTIVE");
+
+    const validation = await adapter.validateConnection(
+      tokenResult.accessToken,
+      accounts[0].externalId
+    );
+    expect(validation.valid).toBe(true);
+    expect(validation.status).toBe("CONNECTED");
+  });
 });
+

@@ -17,6 +17,9 @@ import {
   RefreshCw,
   Building,
   Check,
+  Search,
+  Sparkles,
+  Info,
 } from "lucide-react";
 
 interface ConnectionWizardProps {
@@ -38,6 +41,10 @@ export function ConnectionWizard({
   const [selectedProvider, setSelectedProvider] = useState<ProviderMetadata | null>(
     initialProvider || null
   );
+
+  // Step 1: Filter & Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
 
   // Step 2: Selected permissions
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
@@ -79,6 +86,8 @@ export function ConnectionWizard({
     setTempAuthToken(null);
     setSelectedAccountIds([]);
     setConnectResult(null);
+    setSearchQuery("");
+    setCategoryFilter("ALL");
     onClose();
   };
 
@@ -175,6 +184,38 @@ export function ConnectionWizard({
     }
   };
 
+  // Launch developer sandbox / test account flow
+  const handleSandboxAuthorize = async () => {
+    if (!selectedProvider) return;
+    setIsGeneratingAuth(true);
+
+    try {
+      const res = await fetch("/api/providers/auth-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: selectedProvider.key,
+          permissions: selectedScopes,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed initiating provider authorization.");
+      }
+
+      const expectedState = data.state;
+      await handleExchangeAndDiscover(
+        `sandbox_${selectedProvider.key.toLowerCase()}_code_${Date.now()}`,
+        expectedState
+      );
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setIsGeneratingAuth(false);
+    }
+  };
+
   // Step 4: Exchange code and discover accounts
   const handleExchangeAndDiscover = async (code: string, state: string) => {
     setIsDiscovering(true);
@@ -251,6 +292,26 @@ export function ConnectionWizard({
 
   if (!isOpen) return null;
 
+  // Filter and sort providers for Step 1
+  const filteredProviders = (availableProviders || []).filter((p) => {
+    const matchesCategory =
+      categoryFilter === "ALL" || p.category === categoryFilter;
+    const matchesSearch =
+      p.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.supportedProducts.some((prod) =>
+        prod.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    return matchesCategory && matchesSearch;
+  });
+
+  // Sort: AVAILABLE providers first
+  const sortedProviders = [...filteredProviders].sort((a, b) => {
+    if (a.readiness === "AVAILABLE" && b.readiness !== "AVAILABLE") return -1;
+    if (a.readiness !== "AVAILABLE" && b.readiness === "AVAILABLE") return 1;
+    return 0;
+  });
+
   return (
     <Modal
       isOpen={isOpen}
@@ -296,31 +357,121 @@ export function ConnectionWizard({
         {/* ─── STEP 1: Select Provider ─── */}
         {step === 1 && (
           <div className="space-y-4">
-            <p className="text-xs text-slate-300">
-              Select an available advertising provider configured with live credentials:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {availableProviders
-                .filter((p) => p.readiness === "AVAILABLE")
-                .map((prov) => (
-                  <button
-                    key={prov.key}
-                    onClick={() => handleSelectProvider(prov)}
-                    className="flex items-start space-x-3 rounded-xl border border-slate-800/80 bg-slate-900/80 p-4 text-left hover:border-brand-500/60 transition-all hover:bg-slate-800/60 shadow-sm"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 text-white font-bold text-sm shrink-0 border border-slate-700">
-                      {prov.displayName.slice(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-white">{prov.displayName}</h4>
-                      <p className="text-[11px] text-slate-400">{prov.currentVersion}</p>
-                      <p className="text-[10px] text-emerald-400 mt-1 font-semibold">
-                        Ready to Connect (OAuth 2.0)
-                      </p>
-                    </div>
-                  </button>
-                ))}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+              <p className="text-xs text-slate-300">
+                Choose an advertising platform to initiate connection:
+              </p>
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+                <input
+                  type="text"
+                  placeholder="Search platforms..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition-colors"
+                />
+              </div>
             </div>
+
+            {/* Category Filter Pills */}
+            <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
+              {[
+                { id: "ALL", label: "All Platforms" },
+                { id: "SOCIAL", label: "Social" },
+                { id: "SEARCH", label: "Search" },
+                { id: "MARKETPLACE", label: "Marketplace" },
+                { id: "MOBILE", label: "Mobile / OTT" },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setCategoryFilter(cat.id)}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors whitespace-nowrap ${
+                    categoryFilter === cat.id
+                      ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
+                      : "bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-800"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Provider Grid */}
+            {sortedProviders.length === 0 ? (
+              <div className="rounded-xl border border-slate-800 bg-slate-950/40 p-8 text-center space-y-2">
+                <p className="text-xs text-slate-400">
+                  No advertising platforms match your search criteria.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setCategoryFilter("ALL");
+                  }}
+                  className="text-xs border-slate-700"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1">
+                {sortedProviders.map((prov) => {
+                  const isAvailable = prov.readiness === "AVAILABLE";
+                  const initial = prov.displayName.slice(0, 2).toUpperCase();
+
+                  return (
+                    <button
+                      key={prov.key}
+                      onClick={() => handleSelectProvider(prov)}
+                      className={`flex items-start space-x-3 rounded-xl border p-3.5 text-left transition-all group ${
+                        isAvailable
+                          ? "border-emerald-500/40 bg-slate-900/90 hover:border-emerald-500 hover:bg-slate-800/80 shadow-sm"
+                          : "border-slate-800/80 bg-slate-900/50 hover:border-slate-700 hover:bg-slate-800/50"
+                      }`}
+                    >
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-lg font-bold text-xs shrink-0 border ${
+                          isAvailable
+                            ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-300"
+                            : "bg-slate-800 border-slate-700 text-slate-300"
+                        }`}
+                      >
+                        {initial}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <h4 className="text-xs font-semibold text-white truncate group-hover:text-brand-300 transition-colors">
+                            {prov.displayName}
+                          </h4>
+                          <ArrowRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-brand-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                        </div>
+                        <p className="text-[10px] text-slate-400 truncate mt-0.5">
+                          {prov.currentVersion}
+                        </p>
+
+                        <div className="mt-2 flex items-center">
+                          {isAvailable ? (
+                            <span className="inline-flex items-center text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
+                              Ready to Connect (OAuth 2.0)
+                            </span>
+                          ) : prov.readiness === "PARTNER_ACCESS_REQUIRED" ? (
+                            <span className="inline-flex items-center text-[10px] font-medium text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-full">
+                              Partner Access Required
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center text-[10px] font-medium text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                              Developer Setup
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -374,7 +525,7 @@ export function ConnectionWizard({
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-slate-800">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-slate-800">
               <Button
                 variant="ghost"
                 size="sm"
@@ -382,17 +533,29 @@ export function ConnectionWizard({
                 className="text-xs text-slate-400"
               >
                 <ArrowLeft className="h-3.5 w-3.5 mr-1" />
-                <span>Back</span>
+                <span>Back to Providers</span>
               </Button>
-              <Button
-                size="sm"
-                onClick={handleStartOAuth}
-                isLoading={isGeneratingAuth}
-                className="text-xs bg-brand-600 hover:bg-brand-500 text-white font-medium flex items-center space-x-1.5"
-              >
-                <span>Continue to Authorization</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSandboxAuthorize}
+                  isLoading={isGeneratingAuth}
+                  className="text-xs border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10 font-medium"
+                >
+                  <Sparkles className="h-3.5 w-3.5 mr-1 text-emerald-400" />
+                  <span>Connect Developer Test Account</span>
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleStartOAuth}
+                  isLoading={isGeneratingAuth}
+                  className="text-xs bg-brand-600 hover:bg-brand-500 text-white font-medium flex items-center space-x-1.5"
+                >
+                  <span>Continue to Live OAuth</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
           </div>
         )}
@@ -414,14 +577,24 @@ export function ConnectionWizard({
               </p>
             </div>
 
-            <div className="pt-4 flex items-center justify-center space-x-3">
+            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setStep(2)}
                 className="text-xs border-slate-700"
               >
-                Cancel
+                Back to Permissions
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSandboxAuthorize}
+                isLoading={isGeneratingAuth}
+                className="text-xs border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/10 font-medium"
+              >
+                <Sparkles className="h-3.5 w-3.5 mr-1 text-emerald-400" />
+                <span>Connect Developer Test Account</span>
               </Button>
               <Button
                 size="sm"
@@ -430,7 +603,7 @@ export function ConnectionWizard({
                 className="text-xs bg-brand-600 hover:bg-brand-500 text-white"
               >
                 <RefreshCw className="h-3.5 w-3.5 mr-1" />
-                <span>Re-open Authorization Window</span>
+                <span>Re-open OAuth Window</span>
               </Button>
             </div>
           </div>
